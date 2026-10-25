@@ -4,10 +4,11 @@ import { m, useScroll, useSpring } from "motion/react";
 import { useRef } from "react";
 
 import { ArrowUpRightIcon } from "@/components/icons";
-import { cv } from "@/content/cv";
+import { useContent } from "@/components/content-provider";
 
 /** Idővonal, amelynek vonala görgetés közben „kitöltődik”. */
 export function ExperienceTimeline() {
+  const { cv } = useContent();
   const listRef = useRef<HTMLOListElement>(null);
   const { scrollYProgress } = useScroll({
     target: listRef,
@@ -61,7 +62,7 @@ export function ExperienceTimeline() {
               </ul>
               {job.references && (
                 <p className="mt-6 flex flex-wrap items-center gap-2 border-t border-line pt-4 text-sm">
-                  <span className="text-ink-muted">Referenciák:</span>
+                  <span className="text-ink-muted">{cv.ui.references}</span>
                   {job.references.map((ref) => (
                     <a
                       key={ref.href}
@@ -72,7 +73,7 @@ export function ExperienceTimeline() {
                     >
                       {ref.label}
                       <ArrowUpRightIcon className="text-xs" />
-                      <span className="sr-only">(új lapon nyílik)</span>
+                      <span className="sr-only">{cv.ui.opensInNewTab}</span>
                     </a>
                   ))}
                 </p>
@@ -84,7 +85,7 @@ export function ExperienceTimeline() {
 
       <div className="reveal mt-16">
         <h3 className="font-mono text-xs font-medium tracking-[0.18em] text-ink-muted uppercase">
-          Korábbi műszaki és informatikai tapasztalat
+          {cv.ui.earlierExperience}
         </h3>
         <ul className="mt-5 grid gap-4 md:grid-cols-2">
           {cv.earlierExperience.map((job) => (

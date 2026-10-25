@@ -3,6 +3,7 @@
 import { AnimatePresence, m } from "motion/react";
 import { useSyncExternalStore } from "react";
 
+import { useContent } from "@/components/content-provider";
 import { MoonIcon, SunIcon } from "@/components/icons";
 import { THEME_STORAGE_KEY } from "@/components/theme-script";
 
@@ -35,6 +36,7 @@ function subscribe(onChange: () => void) {
 }
 
 export function ThemeToggle() {
+  const { ui } = useContent().cv;
   const theme = useSyncExternalStore<Theme | null>(subscribe, readTheme, () => null);
   const next: Theme = theme === "dark" ? "light" : "dark";
 
@@ -51,8 +53,8 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label={next === "dark" ? "Váltás sötét témára" : "Váltás világos témára"}
-      title={next === "dark" ? "Sötét téma" : "Világos téma"}
+      aria-label={next === "dark" ? ui.themeToDark : ui.themeToLight}
+      title={next === "dark" ? ui.themeDarkTitle : ui.themeLightTitle}
       className="relative grid size-10 place-items-center overflow-hidden rounded-full border border-line bg-surface/70 text-ink transition-colors hover:border-line-strong hover:text-accent"
     >
       <AnimatePresence initial={false} mode="wait">

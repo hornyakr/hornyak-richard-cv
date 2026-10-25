@@ -4,12 +4,13 @@ import { m, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 
 import { CheckIcon, SparkIcon } from "@/components/icons";
-import { cv } from "@/content/cv";
+import { useContent } from "@/components/content-provider";
 
 const STEP_MS = 1800;
 
 /** A munkafolyamat lépései, egy finoman végigfutó kiemeléssel. */
 export function WorkflowCard() {
+  const { cv } = useContent();
   const reduceMotion = useReducedMotion();
   const steps = cv.workflowSteps;
   const [current, setCurrent] = useState(0);
@@ -32,10 +33,10 @@ export function WorkflowCard() {
       <figcaption className="mb-5 flex items-center justify-between gap-3">
         <span className="eyebrow">
           <SparkIcon className="text-sm" />
-          Munkafolyamat
+          {cv.ui.workflowTitle}
         </span>
         <span className="rounded-full border border-line px-2.5 py-1 font-mono text-[11px] text-ink-muted">
-          szabályvezérelt AI
+          {cv.ui.workflowBadge}
         </span>
       </figcaption>
 

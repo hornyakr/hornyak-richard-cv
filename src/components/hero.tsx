@@ -4,11 +4,11 @@ import { ArrowDownIcon, DownloadIcon, GitHubIcon, MailIcon, MapPinIcon } from "@
 import { CountUp } from "@/components/count-up";
 import { Magnetic } from "@/components/magnetic";
 import { WorkflowCard } from "@/components/workflow-card";
-import { cv } from "@/content/cv";
+import type { CV } from "@/content/types";
 
 const delay = (ms: number) => ({ "--enter-delay": `${ms}ms` }) as CSSProperties;
 
-export function Hero() {
+export function Hero({ cv }: { cv: CV }) {
   const [roleMain, roleSecondary] = cv.roleParts;
 
   return (
@@ -52,11 +52,11 @@ export function Hero() {
           <div className="enter mt-8 flex flex-wrap items-center gap-3" style={delay(200)}>
             <Magnetic>
               <a
-                href="#kapcsolat"
+                href={`#${cv.sections.contact.id}`}
                 className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-ink shadow-[0_10px_30px_-10px_var(--glow)] transition-[background-color,transform] hover:bg-accent-strong active:scale-[0.98]"
               >
                 <MailIcon className="text-base" />
-                Kapcsolatfelvétel
+                {cv.ui.heroContact}
               </a>
             </Magnetic>
             <Magnetic>
@@ -77,7 +77,7 @@ export function Hero() {
             >
               <GitHubIcon className="text-lg" />
               <span>
-                GitHub<span className="sr-only"> (új lapon nyílik)</span>
+                GitHub<span className="sr-only"> {cv.ui.opensInNewTab}</span>
               </span>
             </a>
           </div>
@@ -107,11 +107,11 @@ export function Hero() {
       </div>
 
       <a
-        href="#profil"
+        href={`#${cv.sections.profile.id}`}
         className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 items-center gap-2 text-xs text-ink-muted transition-colors hover:text-accent md:inline-flex"
       >
         <ArrowDownIcon className="motion-safe:animate-bounce" />
-        Tovább a profilhoz
+        {cv.ui.toProfile}
       </a>
     </section>
   );

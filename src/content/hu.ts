@@ -1,111 +1,93 @@
 /**
- * Az oldal teljes tartalma egyetlen típusos forrásból.
+ * Az oldal magyar tartalma (a /  útvonalon).
  * Forrás: Hornyak_Richard_CV_Technical_Business_Analyst.pdf / .docx.
  * Csak a CV-ben szereplő tények és számok kerülhetnek ide.
  * A telefonszám szándékosan hiányzik: a publikus oldalon nem jelenik meg.
  */
 
-export type Link = {
-  label: string;
-  href: string;
-};
+import type { CV } from "@/content/types";
 
-export type Stat = {
-  value: string;
-  label: string;
-  detail: string;
-};
-
-export type Competency = {
-  title: string;
-  description: string;
-};
-
-export type Experience = {
-  company: string;
-  role: string;
-  period: string;
-  summary: string;
-  highlights: string[];
-  references?: Link[];
-};
-
-export type EarlierExperience = {
-  company: string;
-  role: string;
-  period: string;
-  description: string;
-};
-
-export type ProjectMetric = {
-  value: string;
-  label: string;
-};
-
-export type Project = {
-  title: string;
-  tagline: string;
-  context: string;
-  tags: string[];
-  description: string;
-  metrics?: ProjectMetric[];
-  /** Privát repó: nincs link, csak a leírás. */
-  isPrivate?: boolean;
-  link?: Link;
-};
-
-export type ProjectGroup = {
-  id: string;
-  title: string;
-  intro: string;
-  featured?: boolean;
-  projects: Project[];
-};
-
-export type ToolGroup = {
-  title: string;
-  items: string[];
-  emphasis?: boolean;
-};
-
-export type Education = {
-  institution: string;
-  program: string;
-};
-
-export type Language = {
-  name: string;
-  level: string;
-};
-
-export type CV = {
-  name: string;
-  role: string;
-  roleParts: [string, string];
-  location: string;
-  email: string;
-  github: Link;
-  cvPdf: Link & { fileName: string };
-  valueProposition: string;
-  stats: Stat[];
-  workflowSteps: string[];
-  profile: {
-    lead: string;
-    body: string[];
-    aiNote: string;
-  };
-  competencies: Competency[];
-  experience: Experience[];
-  earlierExperience: EarlierExperience[];
-  projectGroups: ProjectGroup[];
-  tools: ToolGroup[];
-  education: Education[];
-  languages: Language[];
-  other: string[];
-  keywords: string[];
-};
-
-export const cv: CV = {
+export const hu: CV = {
+  locale: "hu",
+  htmlLang: "hu",
+  ogLocale: "hu_HU",
+  path: "/",
+  languageCode: "HU",
+  languageName: "Magyar",
+  sections: {
+    profile: {
+      id: "profil",
+      label: "Profil",
+      eyebrow: "Profil",
+      title: "Az üzleti igénytől a működő megoldásig",
+    },
+    competencies: {
+      id: "kompetenciak",
+      label: "Kompetenciák",
+      eyebrow: "Fő kompetenciák",
+      title: "Egy kézben az elemzés és a megvalósítás",
+    },
+    experience: {
+      id: "tapasztalat",
+      label: "Tapasztalat",
+      eyebrow: "Szakmai tapasztalat",
+      title: "Tapasztalat",
+    },
+    projects: {
+      id: "projektek",
+      label: "Projektek",
+      eyebrow: "Kiemelt projektek",
+      title: "Projektek és portfólió",
+      intro:
+        "A hangsúly az új irányon: szakmai szabályokra épülő, AI-vezérelt munkafolyamat és specifikációvezérelt alkalmazásgyártás.",
+    },
+    tools: {
+      id: "eszkozok",
+      label: "Eszközök",
+      eyebrow: "Eszközök és technológiák",
+      title: "Eszköztár",
+    },
+    education: {
+      id: "tanulmanyok",
+      label: "Tanulmányok",
+      eyebrow: "Tanulmányok, nyelvtudás és egyéb",
+      title: "Tanulmányok és nyelvek",
+    },
+    contact: { id: "kapcsolat", label: "Kapcsolat", eyebrow: "Kapcsolat", title: "Beszéljünk!" },
+  },
+  ui: {
+    skipToContent: "Ugrás a tartalomra",
+    chaptersNav: "Fejezetek",
+    chaptersMenu: "Fejezetek menü – most: {chapter}",
+    introChapter: "Bevezető",
+    backToTop: "az oldal tetejére",
+    headerContact: "Kapcsolat",
+    heroContact: "Kapcsolatfelvétel",
+    toProfile: "Tovább a profilhoz",
+    opensInNewTab: "(új lapon nyílik)",
+    themeToDark: "Váltás sötét témára",
+    themeToLight: "Váltás világos témára",
+    themeDarkTitle: "Sötét téma",
+    themeLightTitle: "Világos téma",
+    languageSwitcher: "Nyelv",
+    workflowTitle: "Munkafolyamat",
+    workflowBadge: "szabályvezérelt AI",
+    aiAsideLabel: "AI-vezérelt munkafolyamat",
+    aiAsideEyebrow: "Új irány",
+    aiAsideLink: "AI Workbench és Winzard →",
+    references: "Referenciák:",
+    earlierExperience: "Korábbi műszaki és informatikai tapasztalat",
+    privateRepo: "Privát repó",
+    tagsLabel: "Technológiák és szerepek",
+    projectCount: "{count} projekt",
+    scrollHint: "görgessen tovább →",
+    languagesTitle: "Nyelvtudás",
+    otherTitle: "Egyéb",
+    contactIntro: "Keressen e-mailben, vagy töltse le a teljes önéletrajzot PDF-ben.",
+    copyEmail: "E-mail-cím másolása",
+    copied: "Kimásolva",
+    builtWith: "Next.js, TypeScript, Tailwind CSS és Motion",
+  },
   name: "Hornyák Richárd",
   role: "Technical Business Analyst | Web- és low-code fejlesztő",
   roleParts: ["Technical Business Analyst", "Web- és low-code fejlesztő"],

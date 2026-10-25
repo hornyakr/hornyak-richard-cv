@@ -1,12 +1,15 @@
 import { ImageResponse } from "next/og";
 
-import { cv } from "@/content/cv";
+import { content } from "@/content";
+import type { Locale } from "@/content/types";
 
-export const alt = `${cv.name} – ${cv.role}`;
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const ogSize = { width: 1200, height: 630 };
+export const ogContentType = "image/png";
+export const ogAlt = (locale: Locale) => `${content[locale].name} – ${content[locale].role}`;
 
-export default function OpengraphImage() {
+/** A megosztási kép nyelvenként, ugyanazzal a dizájnnal. */
+export function renderOgImage(locale: Locale) {
+  const cv = content[locale];
   return new ImageResponse(
     <div
       style={{
@@ -71,6 +74,6 @@ export default function OpengraphImage() {
         ))}
       </div>
     </div>,
-    size,
+    ogSize,
   );
 }

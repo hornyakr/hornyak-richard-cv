@@ -49,7 +49,7 @@ export function Section({
       id={id}
       aria-labelledby={headingId}
       tabIndex={-1}
-      className={`relative isolate scroll-mt-20 overflow-x-clip py-20 outline-none sm:py-28 ${className ?? ""}`}
+      className={`relative isolate overflow-x-clip py-20 outline-none sm:py-28 ${className ?? ""}`}
     >
       <m.span
         aria-hidden="true"

@@ -1,10 +1,14 @@
+"use client";
+
 import { ArrowUpRightIcon, LockIcon, SparkIcon } from "@/components/icons";
 import { SpotlightCard } from "@/components/spotlight-card";
-import { cv, type Project } from "@/content/cv";
+import { useContent } from "@/components/content-provider";
+import type { Project } from "@/content/types";
 
 function Tags({ tags }: { tags: readonly string[] }) {
+  const { ui } = useContent().cv;
   return (
-    <ul className="flex flex-wrap gap-1.5" aria-label="Technológiák és szerepek">
+    <ul className="flex flex-wrap gap-1.5" aria-label={ui.tagsLabel}>
       {tags.map((tag) => (
         <li
           key={tag}
@@ -18,6 +22,7 @@ function Tags({ tags }: { tags: readonly string[] }) {
 }
 
 export function ProjectCard({ project, featured }: { project: Project; featured?: boolean }) {
+  const { ui } = useContent().cv;
   return (
     <SpotlightCard
       className={`card flex h-full flex-col p-6 transition-[border-color,transform] duration-300 hover:border-line-strong motion-safe:hover:-translate-y-1 sm:p-7 ${
@@ -52,7 +57,7 @@ export function ProjectCard({ project, featured }: { project: Project; featured?
             {project.isPrivate && (
               <p className="inline-flex items-center gap-2 text-sm text-ink-muted">
                 <LockIcon className="text-accent" />
-                Privát repó
+                {ui.privateRepo}
               </p>
             )}
             {project.link && (
@@ -64,7 +69,7 @@ export function ProjectCard({ project, featured }: { project: Project; featured?
               >
                 {project.link.label}
                 <ArrowUpRightIcon className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                <span className="sr-only">(új lapon nyílik)</span>
+                <span className="sr-only">{ui.opensInNewTab}</span>
               </a>
             )}
           </div>
@@ -76,6 +81,7 @@ export function ProjectCard({ project, featured }: { project: Project; featured?
 
 /** Csoportosított rácsnézet (mobil, kisebb képernyő, csökkentett mozgás). */
 export function ProjectsGrid() {
+  const { cv } = useContent();
   return (
     <div className="space-y-20">
       {cv.projectGroups.map((group) => (

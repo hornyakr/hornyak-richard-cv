@@ -19,19 +19,32 @@ Minden animáció tiszteletben tartja a `prefers-reduced-motion` beállítást (
 ```
 src/
 ├── app/
-│   ├── layout.tsx            # metaadatok, Open Graph, betűtípusok, téma
-│   ├── page.tsx              # szekciók, JSON-LD (schema.org Person)
-│   ├── opengraph-image.tsx   # generált OG-kép
+│   ├── (hu)/                 # magyar gyökér-layout: /  (lang="hu")
+│   │   ├── layout.tsx, page.tsx, opengraph-image.tsx
+│   ├── (en)/en/              # angol gyökér-layout: /en  (lang="en")
+│   │   ├── layout.tsx, page.tsx, opengraph-image.tsx
+│   ├── global-not-found.tsx  # közös 404 (két gyökér-layout mellett)
 │   ├── icon.svg, robots.ts, sitemap.ts
 │   └── globals.css           # dizájntokenek, animációk
-├── components/               # szekció- és UI-komponensek
-├── content/cv.ts             # az oldal teljes tartalma, egyetlen típusos forrásból
-└── lib/site.ts               # URL, cím, navigáció
+├── components/               # nyelvfüggetlen szekció- és UI-komponensek
+├── content/
+│   ├── types.ts              # a tartalom típusa
+│   ├── hu.ts, en.ts          # a teljes tartalom nyelvenként (felületi szövegekkel együtt)
+│   └── index.ts              # nyelvek, nyelvváltó adatai
+└── lib/                      # metaadat, hreflang, OG-kép, segédhookok
 public/
-└── Hornyak_Richard_CV_Technical_Business_Analyst.pdf
+├── Hornyak_Richard_CV_Technical_Business_Analyst.pdf
+└── Hornyak_Richard_CV_Technical_Business_Analyst_EN.pdf
 ```
 
-A szöveges tartalom kizárólag a `src/content/cv.ts` fájlban van; a komponensek innen renderelnek.
+A szöveges tartalom kizárólag a `src/content/hu.ts` és `src/content/en.ts` fájlokban van; a két fájl ugyanazt a `CV` típust valósítja meg, így a fordítás nem maradhat hiányos.
+
+### Többnyelvűség
+
+- A magyar oldal a `/`, az angol a `/en` útvonalon érhető el; mindkettő statikusan generálódik, átirányítás és middleware nélkül.
+- Két gyökér-layout (route groupok), így a `<html lang>` nyelvenként helyes.
+- `hreflang`-alternatívák (`hu`, `en`, `x-default`), nyelvenkénti canonical, Open Graph-locale (`hu_HU`, `en_GB`) és megosztási kép.
+- A fejléc nyelvváltója ugyanarra a fejezetre visz a másik nyelven (a horgonyok nyelvenként eltérnek).
 
 ## Futtatás helyben
 

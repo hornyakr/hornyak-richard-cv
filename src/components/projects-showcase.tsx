@@ -8,28 +8,32 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import { fill, useContent } from "@/components/content-provider";
 import { SparkIcon } from "@/components/icons";
 import { ProjectCard, ProjectsGrid } from "@/components/projects";
 import { RollingText } from "@/components/rolling-text";
-import { cv, type Project, type ProjectGroup } from "@/content/cv";
+import type { CV, Project, ProjectGroup } from "@/content/types";
 import { useMediaQuery } from "@/lib/use-media-query";
 
 type TrackItem =
   | { kind: "intro"; group: ProjectGroup }
   | { kind: "project"; group: ProjectGroup; project: Project };
 
-const items: TrackItem[] = cv.projectGroups.flatMap((group) => [
-  { kind: "intro" as const, group },
-  ...group.projects.map((project) => ({ kind: "project" as const, group, project })),
-]);
+const trackItems = (cv: CV): TrackItem[] =>
+  cv.projectGroups.flatMap((group) => [
+    { kind: "intro" as const, group },
+    ...group.projects.map((project) => ({ kind: "project" as const, group, project })),
+  ]);
 
 /**
  * Rögzített, vízszintes projektsáv: a függőleges görgetés oldalirányban viszi
  * végig a kártyákat. Csak elég nagy képernyőn és engedélyezett mozgásnál.
  */
 function ProjectsTrack() {
+  const { cv } = useContent();
+  const items = useMemo(() => trackItems(cv), [cv]);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLUListElement>(null);
   const [distance, setDistance] = useState(0);
@@ -89,7 +93,9 @@ function ProjectsTrack() {
                   }`}
                 >
                   {item.group.featured && <SparkIcon className="mb-auto text-3xl text-accent" />}
-                  <p className="eyebrow">{item.group.projects.length} projekt</p>
+                  <p className="eyebrow">
+                    {fill(cv.ui.projectCount, { count: item.group.projects.length })}
+                  </p>
                   <h3 className="mt-3 font-display text-3xl leading-tight font-semibold tracking-tight">
                     {item.group.title}
                   </h3>
@@ -113,7 +119,7 @@ function ProjectsTrack() {
             />
           </div>
           <span className="font-mono text-xs text-ink-muted" aria-hidden="true">
-            görgessen tovább →
+            {cv.ui.scrollHint}
           </span>
         </div>
       </div>

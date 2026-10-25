@@ -3,35 +3,38 @@
 import { AnimatePresence, m, useMotionValueEvent, useScroll } from "motion/react";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { fill, useContent } from "@/components/content-provider";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { RollingText } from "@/components/rolling-text";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { cv } from "@/content/cv";
+import type { CV, SectionKey } from "@/content/types";
 import { useMediaQuery } from "@/lib/use-media-query";
-import { sections, type SectionId } from "@/lib/site";
 
 const spring = { type: "spring", stiffness: 420, damping: 36 } as const;
 
-/** Az éppen olvasott fejezet; a hero fölött `null`. */
-function useActiveSection(): SectionId | null {
-  const [active, setActive] = useState<SectionId | null>(null);
+/** Az éppen olvasott fejezet kulcsa; a hero fölött `null`. */
+function useActiveSection(cv: CV): SectionKey | null {
+  const [active, setActive] = useState<SectionKey | null>(null);
 
   useEffect(() => {
+    const keyById = new Map(
+      (Object.keys(cv.sections) as SectionKey[]).map((key) => [cv.sections[key].id, key]),
+    );
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          const id = entry.target.id;
-          setActive(id === "top" ? null : (id as SectionId));
+          setActive(keyById.get(entry.target.id) ?? null);
         }
       },
       { rootMargin: "-35% 0px -60% 0px" },
     );
-    for (const id of ["top", ...sections.map((section) => section.id)]) {
+    for (const id of ["top", ...keyById.keys()]) {
       const element = document.getElementById(id);
       if (element) observer.observe(element);
     }
     return () => observer.disconnect();
-  }, []);
+  }, [cv]);
 
   return active;
 }
@@ -40,7 +43,7 @@ function useActiveSection(): SectionId | null {
  * Fejezetre ugrás: a menü bezárása megszakítaná a böngésző saját horgonygörgetését,
  * ezért a görgetést és a fókuszt a React-frissítés után mi végezzük.
  */
-function goToSection(id: SectionId) {
+function goToSection(id: string) {
   window.setTimeout(() => {
     const target = document.getElementById(id);
     if (!target) return;
@@ -49,6 +52,38 @@ function goToSection(id: SectionId) {
     target.focus({ preventScroll: true });
     history.replaceState(null, "", `#${id}`);
   }, 0);
+}
+
+/**
+ * Horgonnyal érkezve (pl. nyelvváltás után) a böngésző még a hidratálás előtt görget,
+ * de a projektsáv utána megváltoztatja az oldal magasságát. Ezért a betöltés után
+ * egyszer újra a horgonyhoz igazítunk.
+ */
+function useInitialHashScroll() {
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    const target = id ? document.getElementById(id) : null;
+    if (!target) return;
+
+    const align = () => target.scrollIntoView({ behavior: "instant" });
+    align();
+    const observer = new ResizeObserver(align);
+    observer.observe(document.body);
+    // Tartalék, ha a ResizeObserver nem fut (pl. háttérben lévő lap).
+    const retries = [400, 1000].map((delay) => window.setTimeout(align, delay));
+
+    // A felhasználó saját görgetése vagy 1,5 s után már nem igazítunk.
+    const stop = () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+      retries.forEach((retry) => window.clearTimeout(retry));
+      for (const event of userScrollEvents) window.removeEventListener(event, stop);
+    };
+    const userScrollEvents = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+    const timer = window.setTimeout(stop, 1500);
+    for (const event of userScrollEvents) window.addEventListener(event, stop, { passive: true });
+    return stop;
+  }, []);
 }
 
 /** Görgetéssel kitöltődő gyűrű: a teljes oldal olvasottsága. */
@@ -76,7 +111,14 @@ function ProgressRing({ progress }: { progress: ReturnType<typeof useScroll>["sc
  * Asztalon rámutatásra, mobilon koppintásra nyílik ki.
  */
 export function SiteHeader() {
-  const active = useActiveSection();
+  const { cv } = useContent();
+  const { ui } = cv;
+  const sections = (Object.keys(cv.sections) as SectionKey[]).map((key) => ({
+    key,
+    ...cv.sections[key],
+  }));
+  const active = useActiveSection(cv);
+  useInitialHashScroll();
   const isDesktop = useMediaQuery("(min-width: 1200px)");
   const { scrollY, scrollYProgress } = useScroll();
   const [scrolled, setScrolled] = useState(false);
@@ -87,9 +129,9 @@ export function SiteHeader() {
 
   useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 80));
 
-  const activeIndex = sections.findIndex((section) => section.id === active);
+  const activeIndex = sections.findIndex((section) => section.key === active);
   const chapterNumber = activeIndex >= 0 ? String(activeIndex + 1).padStart(2, "0") : "00";
-  const chapterLabel = activeIndex >= 0 ? sections[activeIndex]!.label : "Bevezető";
+  const chapterLabel = activeIndex >= 0 ? sections[activeIndex]!.label : ui.introChapter;
   const inline = isDesktop && (!scrolled || hovered);
   const dropdownOpen = menuOpen && !inline;
 
@@ -112,18 +154,18 @@ export function SiteHeader() {
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-2 px-4 sm:gap-3 sm:px-6">
         <a
           href="#top"
-          aria-label={`${cv.name} – az oldal tetejére`}
-          className="pointer-events-auto grid size-10 place-items-center rounded-xl bg-accent font-mono text-sm font-bold text-accent-ink shadow-[0_8px_24px_-8px_var(--glow)] transition-transform hover:-rotate-6 active:scale-95"
+          aria-label={`${cv.name} – ${ui.backToTop}`}
+          className="pointer-events-auto grid size-10 shrink-0 place-items-center rounded-xl bg-accent font-mono text-sm font-bold text-accent-ink shadow-[0_8px_24px_-8px_var(--glow)] transition-transform hover:-rotate-6 active:scale-95"
         >
           HR
         </a>
 
         <nav
           ref={navRef}
-          aria-label="Fejezetek"
+          aria-label={ui.chaptersNav}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           onFocus={() => setHovered(true)}
@@ -148,14 +190,14 @@ export function SiteHeader() {
                   transition={{ duration: 0.25 }}
                   className="flex items-center gap-0.5"
                 >
-                  {sections.map(({ id, label }, index) => (
-                    <li key={id}>
+                  {sections.map(({ key, id, label }, index) => (
+                    <li key={key}>
                       <a
                         href={`#${id}`}
-                        aria-current={active === id ? "location" : undefined}
+                        aria-current={active === key ? "location" : undefined}
                         className="relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-ink-muted transition-colors hover:text-ink-heading aria-[current=location]:text-ink-heading"
                       >
-                        {active === id && (
+                        {active === key && (
                           <m.span
                             layoutId="nav-pill"
                             aria-hidden="true"
@@ -182,14 +224,14 @@ export function SiteHeader() {
                   onClick={() => setMenuOpen((open) => !open)}
                   aria-expanded={dropdownOpen}
                   aria-controls={menuId}
-                  aria-label={`Fejezetek menü – most: ${chapterLabel}`}
-                  className="flex items-center gap-2.5 rounded-full py-0.5 pr-3 pl-1"
+                  aria-label={fill(ui.chaptersMenu, { chapter: chapterLabel })}
+                  className="flex items-center gap-2 rounded-full py-0.5 pr-2 pl-1 sm:gap-2.5 sm:pr-3"
                 >
                   <ProgressRing progress={scrollYProgress} />
                   <RollingText value={chapterNumber} className="font-mono text-xs text-accent" />
                   <RollingText
                     value={chapterLabel}
-                    className="min-w-[6.5rem] text-left text-sm font-medium text-ink-heading"
+                    className="min-w-[5rem] text-left text-sm font-medium text-ink-heading sm:min-w-[6.5rem]"
                   />
                   <m.svg
                     viewBox="0 0 24 24"
@@ -218,8 +260,8 @@ export function SiteHeader() {
                 transition={spring}
                 className="absolute top-[calc(100%+0.5rem)] left-1/2 w-64 origin-top rounded-2xl border border-line bg-surface p-2 shadow-[0_24px_60px_-24px_rgb(0_0_0/0.45)]"
               >
-                {sections.map(({ id, label }, index) => (
-                  <li key={id}>
+                {sections.map(({ key, id, label }, index) => (
+                  <li key={key}>
                     <a
                       href={`#${id}`}
                       onClick={(event) => {
@@ -227,7 +269,7 @@ export function SiteHeader() {
                         setMenuOpen(false);
                         goToSection(id);
                       }}
-                      aria-current={active === id ? "location" : undefined}
+                      aria-current={active === key ? "location" : undefined}
                       className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink-heading aria-[current=location]:bg-accent-soft aria-[current=location]:text-ink-heading"
                     >
                       <span aria-hidden="true" className="font-mono text-xs text-accent">
@@ -242,13 +284,14 @@ export function SiteHeader() {
           </AnimatePresence>
         </nav>
 
-        <div className="pointer-events-auto flex items-center gap-2">
+        <div className="pointer-events-auto flex shrink-0 items-center gap-2">
+          <LanguageSwitcher activeSection={active} />
           <ThemeToggle />
           <a
-            href="#kapcsolat"
+            href={`#${cv.sections.contact.id}`}
             className="hidden rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink transition-colors hover:bg-accent-strong sm:inline-block"
           >
-            Kapcsolat
+            {ui.headerContact}
           </a>
         </div>
       </div>

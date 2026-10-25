@@ -6,36 +6,37 @@ import { InteractiveBackground } from "@/components/interactive-background";
 import { ProjectsShowcase } from "@/components/projects-showcase";
 import { Section } from "@/components/section";
 import { SiteHeader } from "@/components/site-header";
-import { cv } from "@/content/cv";
-import { site } from "@/lib/site";
+import { content } from "@/content";
+import type { Locale } from "@/content/types";
+import { siteUrl } from "@/lib/site";
 
-// A teljes oldal build időben generálódik; kérésidejű renderelés nem kerülhet bele.
-export const ensureStatic = "navigation";
-
-const personJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: cv.name,
-  jobTitle: cv.roleParts[0],
-  description: cv.profile.lead,
-  url: site.url,
-  email: `mailto:${cv.email}`,
-  sameAs: [cv.github.href],
-  address: { "@type": "PostalAddress", addressLocality: cv.location, addressCountry: "HU" },
-  knowsLanguage: cv.languages.map((language) => language.name),
-  knowsAbout: cv.keywords,
-};
-
-export default function Home() {
+/** Az egyoldalas önéletrajz a megadott nyelven. */
+export function HomePage({ locale }: { locale: Locale }) {
+  const cv = content[locale];
+  const { sections, ui } = cv;
   const [emailUser, emailDomain] = cv.email.split("@");
+
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: cv.name,
+    jobTitle: cv.roleParts[0],
+    description: cv.profile.lead,
+    url: new URL(cv.path, siteUrl).toString(),
+    email: `mailto:${cv.email}`,
+    sameAs: [cv.github.href],
+    address: { "@type": "PostalAddress", addressLocality: cv.location, addressCountry: "HU" },
+    knowsLanguage: cv.languages.map((language) => language.name),
+    knowsAbout: cv.keywords,
+  };
 
   return (
     <>
       <a
-        href="#tartalom"
+        href="#main"
         className="sr-only z-[60] rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-ink focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
-        Ugrás a tartalomra
+        {ui.skipToContent}
       </a>
       <script
         type="application/ld+json"
@@ -47,14 +48,14 @@ export default function Home() {
       <InteractiveBackground />
       <SiteHeader />
 
-      <main id="tartalom" tabIndex={-1} className="outline-none">
-        <Hero />
+      <main id="main" tabIndex={-1} className="outline-none">
+        <Hero cv={cv} />
 
         <Section
-          id="profil"
+          id={sections.profile.id}
           index="01"
-          eyebrow="Profil"
-          title="Az üzleti igénytől a működő megoldásig"
+          eyebrow={sections.profile.eyebrow}
+          title={sections.profile.title}
         >
           <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
             <div className="reveal space-y-5">
@@ -68,31 +69,31 @@ export default function Home() {
               ))}
             </div>
             <aside
-              aria-label="AI-vezérelt munkafolyamat"
+              aria-label={ui.aiAsideLabel}
               className="reveal self-start rounded-2xl border border-accent/30 bg-accent-soft/60 p-6 sm:p-7"
             >
               <p className="eyebrow">
                 <SparkIcon className="text-sm" />
-                Új irány
+                {ui.aiAsideEyebrow}
               </p>
               <p className="mt-4 text-lg leading-relaxed font-medium text-ink-heading">
                 {cv.profile.aiNote}
               </p>
               <a
-                href="#projektek"
+                href={`#${sections.projects.id}`}
                 className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-accent underline-offset-4 hover:text-accent-strong hover:underline"
               >
-                AI Workbench és Winzard →
+                {ui.aiAsideLink}
               </a>
             </aside>
           </div>
         </Section>
 
         <Section
-          id="kompetenciak"
+          id={sections.competencies.id}
           index="02"
-          eyebrow="Fő kompetenciák"
-          title="Egy kézben az elemzés és a megvalósítás"
+          eyebrow={sections.competencies.eyebrow}
+          title={sections.competencies.title}
           className="border-y border-line bg-bg-elevated/55"
         >
           <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -116,23 +117,33 @@ export default function Home() {
           </ol>
         </Section>
 
-        <Section id="tapasztalat" index="03" eyebrow="Szakmai tapasztalat" title="Tapasztalat">
+        <Section
+          id={sections.experience.id}
+          index="03"
+          eyebrow={sections.experience.eyebrow}
+          title={sections.experience.title}
+        >
           <ExperienceTimeline />
         </Section>
 
         <Section
-          id="projektek"
+          id={sections.projects.id}
           index="04"
-          eyebrow="Kiemelt projektek"
-          title="Projektek és portfólió"
-          intro="A hangsúly az új irányon: szakmai szabályokra épülő, AI-vezérelt munkafolyamat és specifikációvezérelt alkalmazásgyártás."
+          eyebrow={sections.projects.eyebrow}
+          title={sections.projects.title}
+          intro={sections.projects.intro}
           className="border-y border-line bg-bg-elevated/55"
           exitEffect={false}
         >
           <ProjectsShowcase />
         </Section>
 
-        <Section id="eszkozok" index="05" eyebrow="Eszközök és technológiák" title="Eszköztár">
+        <Section
+          id={sections.tools.id}
+          index="05"
+          eyebrow={sections.tools.eyebrow}
+          title={sections.tools.title}
+        >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cv.tools.map((group) => (
               <section
@@ -160,10 +171,10 @@ export default function Home() {
         </Section>
 
         <Section
-          id="tanulmanyok"
+          id={sections.education.id}
           index="06"
-          eyebrow="Tanulmányok, nyelvtudás és egyéb"
-          title="Tanulmányok és nyelvek"
+          eyebrow={sections.education.eyebrow}
+          title={sections.education.title}
           className="border-y border-line bg-bg-elevated/55"
         >
           <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
@@ -177,7 +188,7 @@ export default function Home() {
             </ol>
             <div className="reveal card self-start p-6">
               <h3 className="font-mono text-xs font-medium tracking-[0.16em] text-ink-muted uppercase">
-                Nyelvtudás
+                {ui.languagesTitle}
               </h3>
               <dl className="mt-4 divide-y divide-[var(--line)]">
                 {cv.languages.map((language) => (
@@ -191,7 +202,7 @@ export default function Home() {
                 ))}
               </dl>
               <h3 className="mt-6 font-mono text-xs font-medium tracking-[0.16em] text-ink-muted uppercase">
-                Egyéb
+                {ui.otherTitle}
               </h3>
               <ul className="mt-3 space-y-1">
                 {cv.other.map((item) => (
@@ -204,15 +215,18 @@ export default function Home() {
           </div>
         </Section>
 
-        <Section id="kapcsolat" index="07" eyebrow="Kapcsolat" title="Beszéljünk!">
+        <Section
+          id={sections.contact.id}
+          index="07"
+          eyebrow={sections.contact.eyebrow}
+          title={sections.contact.title}
+        >
           <div className="reveal card relative overflow-hidden p-6 sm:p-10">
             <div
               aria-hidden="true"
               className="pointer-events-none absolute -right-24 -bottom-24 size-72 rounded-full bg-accent/20 blur-3xl"
             />
-            <p className="max-w-2xl text-lg leading-relaxed text-ink-muted">
-              Keressen e-mailben, vagy töltse le a teljes önéletrajzot PDF-ben.
-            </p>
+            <p className="max-w-2xl text-lg leading-relaxed text-ink-muted">{ui.contactIntro}</p>
 
             <a
               href={`mailto:${cv.email}`}
@@ -243,7 +257,7 @@ export default function Home() {
               >
                 <GitHubIcon />
                 {cv.github.label}
-                <span className="sr-only">(új lapon nyílik)</span>
+                <span className="sr-only">{ui.opensInNewTab}</span>
               </a>
             </div>
 
@@ -258,7 +272,7 @@ export default function Home() {
       <footer className="border-t border-line">
         <div className="section-shell flex flex-col gap-2 py-8 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between">
           <p>© {cv.name}</p>
-          <p>Next.js, TypeScript, Tailwind CSS és Motion</p>
+          <p>{ui.builtWith}</p>
         </div>
       </footer>
     </>
