@@ -21,9 +21,9 @@ export const en: CV = {
       title: "From business need to working solution",
     },
     competencies: {
-      id: "skills",
-      label: "Skills",
-      eyebrow: "Core skills",
+      id: "competencies",
+      label: "Competencies",
+      eyebrow: "Core competencies",
       title: "Analysis and implementation, combined",
     },
     experience: {
@@ -35,10 +35,10 @@ export const en: CV = {
     projects: {
       id: "projects",
       label: "Projects",
-      eyebrow: "Selected projects",
+      eyebrow: "Selected projects and portfolio",
       title: "Projects and portfolio",
       intro:
-        "The focus is on the new direction: a rule-based, AI-driven workflow and specification-driven application generation.",
+        "The focus is on the new direction: an AI-driven workflow grounded in professional rules, and specification-driven application production.",
     },
     tools: {
       id: "tools",
@@ -49,7 +49,7 @@ export const en: CV = {
     education: {
       id: "education",
       label: "Education",
-      eyebrow: "Education, languages and more",
+      eyebrow: "Education, languages and other",
       title: "Education and languages",
     },
     contact: { id: "contact", label: "Contact", eyebrow: "Contact", title: "Let’s talk" },
@@ -70,7 +70,7 @@ export const en: CV = {
     themeLightTitle: "Light theme",
     languageSwitcher: "Language",
     workflowTitle: "Workflow",
-    workflowBadge: "rule-based AI",
+    workflowBadge: "rule-driven AI",
     aiAsideLabel: "AI-driven workflow",
     aiAsideEyebrow: "New direction",
     aiAsideLink: "AI Workbench and Winzard →",
@@ -99,51 +99,51 @@ export const en: CV = {
     fileName: "Hornyak_Richard_CV_Technical_Business_Analyst_EN.pdf",
   },
   valueProposition:
-    "I gather and refine business requirements, produce functional specifications and process and data models, then hand the solution over to the development team or implement it myself.",
+    "I elicit and refine business requirements, produce functional specifications, process and data models, and then either hand the solution over to the development team or build it myself.",
   stats: [
     {
       value: "5 years",
       label: "of experience",
       detail:
-        "business administration, records management and internal enterprise systems, web applications",
+        "business administration, document management and internal enterprise systems, web applications",
     },
     {
       value: "2 + 2",
       label: "client and internal projects",
-      detail: "at Spartan Code, from requirements gathering to handover",
+      detail: "at Spartan Code Zrt., from discovery to handover",
     },
     {
       value: "REST API",
-      label: "records management integration",
-      detail: "records management of a public authority system, integrated via REST API",
+      label: "document management integration",
+      detail: "document management integrated via a REST API in a public-authority system",
     },
     {
       value: "2,100+",
       label: "commits on Winzard",
-      detail: "130+ merged PRs on my own application generation platform",
+      detail: "130+ merged PRs on my own application production platform",
     },
   ],
   workflowSteps: [
-    "Requirements gathering",
+    "Requirements elicitation",
     "Specification",
     "Modelling",
     "Implementation",
     "Handover and testing",
   ],
   profile: {
-    lead: "I am a Technical Business Analyst with a background in web and low-code development and five years of experience in business administration, records management and internal enterprise systems, as well as web applications.",
+    lead: "Technical Business Analyst with a web and low-code development background and five years of experience in business administration, document management and internal enterprise systems, as well as web applications.",
     body: [
-      "Through client interviews and workshops, I gather and refine business requirements, produce functional specifications and process and data models, then hand the solution over to the development team or implement it myself: currently in a JavaScript-based low-code framework with SQL, MongoDB and REST API integrations; previously I developed in PHP/Symfony and JavaScript.",
-      "I designed and delivered several projects from requirements gathering through to handover.",
+      "Through client interviews and meetings I elicit and refine business requirements, produce functional specifications, process and data models, and then either hand the solution over to the development team or build it myself: currently in a JavaScript-based low-code framework with SQL, MongoDB and REST API integrations, previously in PHP/Symfony and JavaScript.",
+      "I have designed and delivered several projects from discovery to handover.",
     ],
     aiNote:
-      "I work with my own rule-based, AI-driven workflow, which makes my work more accurate and efficient from specification through to testing.",
+      "I work with a self-built, AI-driven workflow grounded in professional rules, which makes my work more accurate and efficient from specification to testing.",
   },
   competencies: [
     {
-      title: "Requirements gathering",
+      title: "Requirements elicitation",
       description:
-        "Client interviews and workshops, requirements breakdown, acceptance criteria, backlog management.",
+        "Client interviews and meetings, requirements breakdown, acceptance criteria, backlog management.",
     },
     {
       title: "Specification",
@@ -175,26 +175,26 @@ export const en: CV = {
       role: "Technical Business Analyst / Low-code Developer",
       period: "2024 – 2026",
       summary:
-        "I gather requirements for records management, business administration and internal enterprise systems through client interviews and workshops; to date I have worked on 2 client and 2 internal projects.",
+        "Gather requirements for document management, business administration and internal enterprise systems through client interviews and meetings; worked on 2 client and 2 internal projects to date.",
       highlights: [
-        "I write functional specifications, data model descriptions and acceptance criteria; I manage tasks in a Jira backlog and hand them over to the development team within an agile (Scrum) framework.",
-        "I design domain and relational data models, status workflows, permission rules and user interfaces (Figma, draw.io).",
-        "I implement forms, workflows and business logic in the company’s in-house JavaScript-based low-code framework, and write SQL and MongoDB queries.",
-        "I scope, implement and connect REST API integrations; in a public authority system, I integrated records management via a REST API.",
-        "I test the framework, propose fixes and improvements, and verify the fixes.",
-        "I run client demos, hold technical discussions with partners, and support testing and user acceptance (UAT).",
+        "Write functional specifications, data model descriptions and acceptance criteria; manage tasks in a Jira backlog and hand them over to the development team within an agile (Scrum) framework.",
+        "Design domain and relational data models, status workflows, permission rules and user interfaces (Figma, draw.io).",
+        "Implement forms, workflows and business logic in the company’s in-house, JavaScript-based low-code framework, and write SQL and MongoDB queries.",
+        "Assess, implement and connect REST API integrations; integrated document management via a REST API in a public-authority system.",
+        "Test the framework, propose fixes and improvements to it, and verify the fixes.",
+        "Run client demos, hold technical meetings with partners, and support testing and user acceptance (UAT).",
       ],
     },
     {
       company: "Echobase Kft.",
-      role: "Web Developer & Business Planner",
+      role: "Web Developer and Business Planner",
       period: "2021 – 2024",
       summary:
-        "I developed business concepts and system designs for web applications, breaking requirements down into development tasks and prioritising them.",
+        "Developed the business concept and system design of web applications; broke requirements down into development tasks and prioritised them.",
       highlights: [
-        "As a developer, I also worked on implementation, coding web application features in PHP, Symfony, Twig, JavaScript and HTML.",
-        "I built the QuizStar scoring system as a working front-end application with ViteJS, running in a local environment.",
-        "I produced business plans, prototypes, MVPs and pitch materials for startup and innovation projects; I presented the plan for the PropSetNet sales web application to 5–10 investors as part of a university startup programme.",
+        "Also worked on implementation as a developer, coding web application features in PHP, Symfony, Twig, JavaScript and HTML.",
+        "Built the QuizStar scoring system as a working front-end application with ViteJS, running in a local environment.",
+        "Prepared business plans, prototypes, MVPs and pitch decks for startup and innovation projects; presented the plan for PropSetNet, a sales web application, to 5–10 investors as part of a university startup programme.",
       ],
       references: [
         { label: "quizstar.ebtest.hu", href: "https://quizstar.ebtest.hu" },
@@ -205,17 +205,17 @@ export const en: CV = {
   earlierExperience: [
     {
       company: "Flex (Flextronics) – Axis product line",
-      role: "Diagnostics Operator, Technician",
+      role: "Diagnostic Operator / Technician",
       period: "2018 – 2020",
       description:
-        "Diagnosing, troubleshooting and repairing industrial and security IP cameras and electronic products in a documented manufacturing environment.",
+        "Diagnosis, fault-finding and repair of industrial and security IP cameras and other electronic products in a documented manufacturing environment.",
     },
     {
       company: "Gastland Flight Catering",
       role: "IT Administrator / Point of Contact",
       period: "2017 – 2018",
       description:
-        "Supporting Windows and Linux environments, maintaining the hardware fleet, providing user support, and supporting the installation and operation of a Linux-based mail server.",
+        "Windows and Linux support, hardware maintenance, end-user support, and support in setting up and running a Linux-based mail server.",
     },
   ],
   projectGroups: [
@@ -228,20 +228,20 @@ export const en: CV = {
       projects: [
         {
           title: "AI Workbench",
-          tagline: "Rule-driven AI workflow",
+          tagline: "Rule-Driven AI Workflow",
           context: "Personal project, since October 2026",
           tags: ["Claude Code", "Codex", "MCP", "PostgreSQL", "TypeScript"],
           description:
-            "Guides the work of AI agents through the development process according to professional rules: ticket management, conflict handling between parallel sessions, rule gates, model selection, effort accounting, review and a learning loop. I evolved the file-based first version (Markdown, YAML, scripts) into a PostgreSQL-based service and an MCP server; Winzard’s development runs on it. My goal is to extend the pattern to other professions.",
+            "Guides the work of AI agents through the development process along professional rules: ticketing, conflict handling for parallel sessions, rule gates, model selection, effort tracking, review and a learning loop. I evolved the first, file-based version (Markdown, YAML, scripts) into a PostgreSQL-based service and MCP server; Winzard is developed on it. My goal is to extend the approach to other professions.",
           isPrivate: true,
         },
         {
           title: "Winzard",
-          tagline: "Specification-driven application generation platform",
+          tagline: "Specification-Driven Application Production Platform",
           context: "Personal project, since July 2026",
           tags: ["TypeScript", "Next.js", "Prisma", "PostgreSQL", "Docker"],
           description:
-            "My own framework and production pipeline that generates applications in a verified way from an approved business specification (ApplicationSpec, UML): data model, Prisma schema, permissions, workflows and tests. Reusable modules (authentication, LDAP/AD, email, notifications, scheduler), automated verification based on acceptance cases, human approval and UAT release.",
+            "My own framework and production pipeline that builds applications in a verified way from an approved business specification (ApplicationSpec, UML): data model, Prisma schema, permissions, workflows and tests. Reusable modules (authentication, LDAP/AD, mail, notifications, scheduler), automated verification based on acceptance cases, human approval and UAT release.",
           metrics: [
             { value: "2,100+", label: "commits" },
             { value: "130+", label: "merged PRs" },
@@ -255,23 +255,23 @@ export const en: CV = {
     {
       id: "client",
       title: "Client and internal projects",
-      intro: "Business analysis, design and implementation at Spartan Code.",
+      intro: "Business analysis, design and delivery at Spartan Code Zrt.",
       projects: [
         {
-          title: "Public authority case management system",
-          tagline: "Transport infrastructure",
+          title: "Public-Authority Case Management System",
+          tagline: "Transport Infrastructure",
           context: "Spartan Code Zrt., client project",
-          tags: ["Business analysis", "Records management", "REST API integration"],
+          tags: ["Business analysis", "Document management", "REST API integration"],
           description:
-            "A large-scale public authority case management system with several subsystems: a public client portal (also for international clients) and an internal case-handling system. I modelled records management in line with the business requirements and integrated it into the system via a REST API, so that it follows each case across every subsystem.",
+            "Large-scale public-authority case management system with several subsystems: a public client portal (also serving clients abroad) and an internal caseworker system. I mapped document management to the business requirements and integrated it via a REST API, so it follows each case across every subsystem.",
         },
         {
-          title: "Project planning support system",
-          tagline: "Independent design and implementation",
+          title: "Project Planning Support System",
+          tagline: "Independent design and delivery",
           context: "Spartan Code Zrt.",
           tags: ["Business analysis", "System design"],
           description:
-            "A system for the structured registration of projects, applications and system components, which I designed and implemented from requirements gathering through to handover. It automatically generates documentation and diagrams from the recorded data.",
+            "A system for the structured registration of projects, applications and system components, which I designed and delivered from discovery to handover. It automatically generates documentation and diagrams from the recorded data.",
         },
       ],
     },
@@ -281,12 +281,12 @@ export const en: CV = {
       intro: "Publicly available personal projects.",
       projects: [
         {
-          title: "Ingatlan Portál",
-          tagline: "Public property portal and internal CRM concept",
+          title: "Real Estate Portal",
+          tagline: "Public Portal and Internal CRM Concept",
           context: "Personal project",
           tags: ["Product and data model design", "React / Next.js"],
           description:
-            "Working demo: property search, professional and agency pages and an internal CRM workspace in one system.",
+            "Working demo combining property search, agent and agency pages, and an internal CRM workspace in one system.",
           link: {
             label: "ingatlan-portal-five.vercel.app",
             href: "https://ingatlan-portal-five.vercel.app",
@@ -297,7 +297,7 @@ export const en: CV = {
           tagline: "Website",
           context: "Personal project",
           tags: ["Vanilla JavaScript and HTML", "No framework"],
-          description: "A website built with vanilla JavaScript and HTML, without a framework.",
+          description: "Website built with vanilla JavaScript and HTML, without a framework.",
           link: { label: "cityplan.hu", href: "https://cityplan.hu" },
         },
       ],
@@ -310,7 +310,7 @@ export const en: CV = {
         "Claude Code",
         "Codex",
         "MCP servers",
-        "Rule-based orchestration of AI agents",
+        "Rule-driven orchestration of AI agents",
         "GitHub Actions",
       ],
       emphasis: true,
@@ -318,7 +318,7 @@ export const en: CV = {
     { title: "Analysis and design", items: ["Jira", "Confluence", "Figma", "draw.io"] },
     { title: "Methodology", items: ["Agile / Scrum", "BPMN", "UML", "UAT"] },
     {
-      title: "Day-to-day development",
+      title: "Daily development",
       items: [
         "JavaScript",
         "SQL",
@@ -344,22 +344,23 @@ export const en: CV = {
       ],
     },
     {
-      title: "Earlier and supplementary",
+      title: "Previous and supplementary",
       items: ["PHP", "Symfony", "Twig", "ViteJS", "Windows and Linux administration basics"],
     },
   ],
   education: [
     {
       institution: "Óbuda University, John von Neumann Faculty of Informatics",
-      program: "BSc in Computer Science Engineering – started 2017, not completed",
+      program: "Computer Engineering BSc – from 2017, not completed",
     },
     {
       institution: "Kölcsey Ferenc Grammar School, Budapest",
-      program: "French bilingual programme, 2009–2015; school-leaving exam in IT",
+      program:
+        "Hungarian–French bilingual programme, 2009–2015; secondary school leaving exam in IT",
     },
     {
       institution: "Városliget Hungarian–English Bilingual Primary School, Budapest",
-      program: "Hungarian–English bilingual education",
+      program: "Hungarian–English bilingual programme",
     },
   ],
   languages: [
@@ -371,7 +372,7 @@ export const en: CV = {
   keywords: [
     "Technical Business Analyst",
     "business analysis",
-    "requirements management",
+    "requirements elicitation",
     "functional specification",
     "BPMN",
     "UML",
