@@ -7,7 +7,8 @@ Egyoldalas, statikusan generált önéletrajz-oldal: **Technical Business Analys
 - [Next.js 16](https://nextjs.org) (App Router, Cache Components, `ensureStatic = "navigation"` – a teljes oldal build időben generálódik)
 - TypeScript (strict, `noUncheckedIndexedAccess`)
 - Tailwind CSS 4 (CSS-változókra épülő tokenek, világos és sötét téma)
-- [Motion](https://motion.dev) (`LazyMotion` + `m.*`): idővonal-kitöltés, aktív menüpont, témaváltó, munkafolyamat-kártya
+- [Motion](https://motion.dev) (`LazyMotion` + `m.*`): „dynamic island” fejezetnavigáció, görgetésvezérelt fejezetváltások, rögzített vízszintes projektsáv, idővonal-kitöltés, mágneses gombok, felpörgő számok
+- Canvas 2D: egérkövető, kattintásra hullámzó pontháló a háttérben (függőség nélkül)
 - Natív CSS scroll-driven animációk (`animation-timeline: view()`) a szekciók megjelenéséhez
 - ESLint (`eslint-config-next` + `eslint-config-prettier`), Prettier (`prettier-plugin-tailwindcss`)
 
