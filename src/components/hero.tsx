@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 
 import { ArrowDownIcon, DownloadIcon, GitHubIcon, MailIcon, MapPinIcon } from "@/components/icons";
+import { CountUp } from "@/components/count-up";
+import { Magnetic } from "@/components/magnetic";
 import { WorkflowCard } from "@/components/workflow-card";
 import { cv } from "@/content/cv";
 
@@ -15,7 +17,6 @@ export function Hero() {
       aria-labelledby="hero-title"
       className="relative isolate flex min-h-[100svh] items-center overflow-hidden pt-24 pb-16 sm:pt-28"
     >
-      <div aria-hidden="true" className="bg-grid absolute inset-0 -z-10" />
       <div
         aria-hidden="true"
         className="absolute top-[-10rem] left-1/2 -z-10 h-[32rem] w-[48rem] max-w-[140vw] -translate-x-1/2 rounded-full bg-accent/15 blur-[120px]"
@@ -49,21 +50,25 @@ export function Hero() {
           </p>
 
           <div className="enter mt-8 flex flex-wrap items-center gap-3" style={delay(200)}>
-            <a
-              href="#kapcsolat"
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-ink shadow-[0_10px_30px_-10px_var(--glow)] transition-[background-color,transform] hover:bg-accent-strong active:scale-[0.98]"
-            >
-              <MailIcon className="text-base" />
-              Kapcsolatfelvétel
-            </a>
-            <a
-              href={cv.cvPdf.href}
-              download={cv.cvPdf.fileName}
-              className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface/60 px-5 py-3 text-sm font-semibold text-ink-heading backdrop-blur transition-[color,border-color,transform] hover:border-accent hover:text-accent active:scale-[0.98]"
-            >
-              <DownloadIcon className="text-base" />
-              {cv.cvPdf.label}
-            </a>
+            <Magnetic>
+              <a
+                href="#kapcsolat"
+                className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-ink shadow-[0_10px_30px_-10px_var(--glow)] transition-[background-color,transform] hover:bg-accent-strong active:scale-[0.98]"
+              >
+                <MailIcon className="text-base" />
+                Kapcsolatfelvétel
+              </a>
+            </Magnetic>
+            <Magnetic>
+              <a
+                href={cv.cvPdf.href}
+                download={cv.cvPdf.fileName}
+                className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface/60 px-5 py-3 text-sm font-semibold text-ink-heading backdrop-blur transition-[color,border-color,transform] hover:border-accent hover:text-accent active:scale-[0.98]"
+              >
+                <DownloadIcon className="text-base" />
+                {cv.cvPdf.label}
+              </a>
+            </Magnetic>
             <a
               href={cv.github.href}
               target="_blank"
@@ -93,7 +98,7 @@ export function Hero() {
                 {stat.label}
               </dt>
               <dd className="order-1 font-display text-2xl font-semibold tracking-tight text-ink-heading sm:text-[1.65rem]">
-                {stat.value}
+                <CountUp value={stat.value} />
               </dd>
               <dd className="order-3 mt-1.5 text-xs leading-snug text-ink-muted">{stat.detail}</dd>
             </div>
