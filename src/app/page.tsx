@@ -211,8 +211,7 @@ export default function Home() {
               className="pointer-events-none absolute -right-24 -bottom-24 size-72 rounded-full bg-accent/20 blur-3xl"
             />
             <p className="max-w-2xl text-lg leading-relaxed text-ink-muted">
-              Keressen e-mailben, vagy töltse le a teljes önéletrajzot PDF-ben. A Winzard és az AI
-              Workbench privát repóját interjún szívesen bemutatom.
+              Keressen e-mailben, vagy töltse le a teljes önéletrajzot PDF-ben.
             </p>
 
             <a

@@ -133,7 +133,7 @@ export const cv: CV = {
     {
       value: "REST API",
       label: "iratkezelés-integráció",
-      detail: "egy hatósági rendszer teljes iratkezelése REST API-n keresztül",
+      detail: "egy hatósági rendszer iratkezelése REST API-n keresztül",
     },
     {
       value: "2 100+",
@@ -152,7 +152,7 @@ export const cv: CV = {
     lead: "Technical Business Analyst vagyok, web- és low-code fejlesztői háttérrel, öt év tapasztalattal ügyviteli, iratkezelési és belső vállalati rendszerek, valamint webalkalmazások területén.",
     body: [
       "Megrendelői interjúkon és egyeztetéseken felmérem és pontosítom az üzleti igényeket, funkcionális specifikációt, folyamat- és adatmodellt készítek, majd a megoldást átadom a fejlesztőcsapatnak, vagy magam valósítom meg: jelenleg JavaScript-alapú low-code keretrendszerben SQL-lel, MongoDB-vel és REST API-integrációkkal, korábban PHP/Symfony és JavaScript környezetben fejlesztettem.",
-      "Több projektet a felméréstől az átadásig egészében én terveztem és valósítottam meg.",
+      "Több projektet a felméréstől az átadásig én terveztem és valósítottam meg.",
     ],
     aiNote:
       "Saját fejlesztésű, szakmai szabályokra épülő AI-vezérelt munkafolyamattal dolgozom, amely a specifikációtól a tesztelésig pontosabbá és hatékonyabbá teszi a munkámat.",
@@ -198,7 +198,7 @@ export const cv: CV = {
         "Funkcionális specifikációt, adatmodell-leírást és elfogadási kritériumokat készítek; a feladatokat Jira-backlogban kezelem, és agilis (Scrum) keretben adom át a fejlesztőcsapatnak.",
         "Domain- és relációs adatmodelleket, státuszfolyamatokat, jogosultsági szabályokat és felhasználói felületeket tervezek (Figma, draw.io).",
         "A cég saját fejlesztésű, JavaScript-alapú low-code keretrendszerében űrlapokat, workflow-kat és üzleti logikát implementálok; SQL- és MongoDB-lekérdezéseket írok.",
-        "REST API-integrációkat mérek fel, implementálok és kötök be; egy hatósági rendszerben a teljes iratkezelést REST API-n keresztül integráltam.",
+        "REST API-integrációkat mérek fel, implementálok és kötök be; egy hatósági rendszerben az iratkezelést REST API-n keresztül integráltam.",
         "Tesztelem a keretrendszert, javítási és fejlesztési javaslatokat teszek rá, majd ellenőrzöm a javításokat.",
         "Megrendelői bemutatókat tartok, technikai egyeztetéseket folytatok a partnerekkel, és támogatom a tesztelést és a felhasználói elfogadást (UAT).",
       ],
@@ -279,9 +279,9 @@ export const cv: CV = {
           title: "Hatósági ügyviteli rendszer",
           tagline: "Közlekedési infrastruktúra",
           context: "Spartan Code Zrt., ügyfélprojekt",
-          tags: ["Üzleti elemzés", "Folyamat- és domainmodellezés", "REST API-integráció"],
+          tags: ["Üzleti elemzés", "Iratkezelés", "REST API-integráció"],
           description:
-            "Nagyméretű hatósági ügyviteli rendszer több alrendszerrel: publikus ügyfélportál (külföldi ügyfeleknek is) és belső ügyintézői rendszer. Leképeztem az ügyek teljes hivatali folyamatát – kérelemre és hivatalból indítás, ellenőrzés, hiánypótlás, tényállás-tisztázás, döntés –, valamint a nyilvántartásokat, az ügyféltörzset és az ügytípusok paraméterezését. Az iratkezelést REST API-n keresztül integráltam, így minden alrendszeren végigkíséri az ügyet.",
+            "Nagyméretű hatósági ügyviteli rendszer több alrendszerrel: publikus ügyfélportál (külföldi ügyfeleknek is) és belső ügyintézői rendszer. Az iratkezelést az üzleti igényekhez igazítva képeztem le, és REST API-n keresztül integráltam a rendszerbe, így minden alrendszeren végigkíséri az ügyet.",
         },
         {
           title: "Projekttervezést támogató rendszer",
@@ -289,7 +289,7 @@ export const cv: CV = {
           context: "Spartan Code Zrt.",
           tags: ["Üzleti elemzés", "Rendszertervezés"],
           description:
-            "Projektek, alkalmazások és rendszerelemek strukturált nyilvántartására szolgáló rendszer, amelyet a felméréstől az átadásig egészében én terveztem és valósítottam meg. A megoldás a rögzített adatokból automatikusan generál dokumentációt és diagramokat.",
+            "Projektek, alkalmazások és rendszerelemek strukturált nyilvántartására szolgáló rendszer, amelyet a felméréstől az átadásig én terveztem és valósítottam meg. A megoldás a rögzített adatokból automatikusan generál dokumentációt és diagramokat.",
         },
       ],
     },

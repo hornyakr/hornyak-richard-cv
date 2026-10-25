@@ -52,7 +52,7 @@ export function ProjectCard({ project, featured }: { project: Project; featured?
             {project.isPrivate && (
               <p className="inline-flex items-center gap-2 text-sm text-ink-muted">
                 <LockIcon className="text-accent" />
-                Privát repó, interjún bemutatható
+                Privát repó
               </p>
             )}
             {project.link && (
