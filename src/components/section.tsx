@@ -1,4 +1,7 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { m, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useRef, type ReactNode } from "react";
 
 type SectionProps = {
   id: string;
@@ -8,17 +11,58 @@ type SectionProps = {
   intro?: string;
   children: ReactNode;
   className?: string;
+  /** Kilépéskor a tartalom finoman hátrébb lép (rögzített elemeknél kikapcsolandó). */
+  exitEffect?: boolean;
 };
 
-export function Section({ id, index, eyebrow, title, intro, children, className }: SectionProps) {
+/**
+ * Fejezet: görgetésre a háttérben úszó óriás sorszám parallaxban mozog,
+ * kilépéskor pedig a tartalom hátrébb lép, átadva a helyet a következőnek.
+ */
+export function Section({
+  id,
+  index,
+  eyebrow,
+  title,
+  intro,
+  children,
+  className,
+  exitEffect = true,
+}: SectionProps) {
+  const ref = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
   const headingId = `${id}-title`;
+
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const numeralY = useTransform(scrollYProgress, [0, 1], ["40%", "-40%"]);
+
+  const { scrollYProgress: exitProgress } = useScroll({
+    target: ref,
+    offset: ["end 55%", "end start"],
+  });
+  const exitScale = useTransform(exitProgress, [0, 1], [1, 0.94]);
+  const exitOpacity = useTransform(exitProgress, [0, 1], [1, 0.2]);
+
   return (
     <section
+      ref={ref}
       id={id}
       aria-labelledby={headingId}
-      className={`scroll-mt-20 py-20 sm:py-28 ${className ?? ""}`}
+      tabIndex={-1}
+      className={`relative isolate scroll-mt-20 overflow-x-clip py-20 outline-none sm:py-28 ${className ?? ""}`}
     >
-      <div className="section-shell">
+      <m.span
+        aria-hidden="true"
+        style={reduceMotion ? undefined : { y: numeralY }}
+        className="text-outline pointer-events-none absolute top-8 -right-[0.04em] -z-10 font-display text-[clamp(9rem,28vw,24rem)] leading-none font-bold tracking-[-0.06em] opacity-70 select-none"
+      >
+        {index}
+      </m.span>
+
+      <m.div
+        style={reduceMotion || !exitEffect ? undefined : { scale: exitScale, opacity: exitOpacity }}
+        className="section-shell origin-top"
+      >
         <header className="reveal mb-12 max-w-3xl sm:mb-16">
           <p className="eyebrow">
             <span className="text-ink-muted">{index}</span>
@@ -36,7 +80,7 @@ export function Section({ id, index, eyebrow, title, intro, children, className 
           )}
         </header>
         {children}
-      </div>
+      </m.div>
     </section>
   );
 }
