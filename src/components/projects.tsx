@@ -17,7 +17,7 @@ function Tags({ tags }: { tags: readonly string[] }) {
   );
 }
 
-function ProjectCard({ project, featured }: { project: Project; featured?: boolean }) {
+export function ProjectCard({ project, featured }: { project: Project; featured?: boolean }) {
   return (
     <SpotlightCard
       className={`card flex h-full flex-col p-6 transition-[border-color,transform] duration-300 hover:border-line-strong motion-safe:hover:-translate-y-1 sm:p-7 ${
@@ -74,7 +74,8 @@ function ProjectCard({ project, featured }: { project: Project; featured?: boole
   );
 }
 
-export function Projects() {
+/** Csoportosított rácsnézet (mobil, kisebb képernyő, csökkentett mozgás). */
+export function ProjectsGrid() {
   return (
     <div className="space-y-20">
       {cv.projectGroups.map((group) => (

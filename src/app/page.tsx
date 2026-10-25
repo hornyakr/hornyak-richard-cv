@@ -3,7 +3,7 @@ import { ExperienceTimeline } from "@/components/experience-timeline";
 import { Hero } from "@/components/hero";
 import { DownloadIcon, GitHubIcon, MailIcon, MapPinIcon, SparkIcon } from "@/components/icons";
 import { InteractiveBackground } from "@/components/interactive-background";
-import { Projects } from "@/components/projects";
+import { ProjectsShowcase } from "@/components/projects-showcase";
 import { Section } from "@/components/section";
 import { SiteHeader } from "@/components/site-header";
 import { cv } from "@/content/cv";
@@ -127,8 +127,9 @@ export default function Home() {
           title="Projektek és portfólió"
           intro="A hangsúly az új irányon: szakmai szabályokra épülő, AI-vezérelt munkafolyamat és specifikációvezérelt alkalmazásgyártás."
           className="border-y border-line bg-bg-elevated/55"
+          exitEffect={false}
         >
-          <Projects />
+          <ProjectsShowcase />
         </Section>
 
         <Section id="eszkozok" index="05" eyebrow="Eszközök és technológiák" title="Eszköztár">
