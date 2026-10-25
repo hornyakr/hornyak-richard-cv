@@ -2,6 +2,7 @@ import { CopyEmailButton } from "@/components/copy-email-button";
 import { ExperienceTimeline } from "@/components/experience-timeline";
 import { Hero } from "@/components/hero";
 import { DownloadIcon, GitHubIcon, MailIcon, MapPinIcon, SparkIcon } from "@/components/icons";
+import { InteractiveBackground } from "@/components/interactive-background";
 import { Projects } from "@/components/projects";
 import { Section } from "@/components/section";
 import { SiteHeader } from "@/components/site-header";
@@ -43,6 +44,7 @@ export default function Home() {
         }}
       />
 
+      <InteractiveBackground />
       <SiteHeader />
 
       <main id="tartalom" tabIndex={-1} className="outline-none">
@@ -91,7 +93,7 @@ export default function Home() {
           index="02"
           eyebrow="Fő kompetenciák"
           title="Egy kézben az elemzés és a megvalósítás"
-          className="border-y border-line bg-bg-elevated"
+          className="border-y border-line bg-bg-elevated/55"
         >
           <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cv.competencies.map((competency, index) => (
@@ -124,7 +126,7 @@ export default function Home() {
           eyebrow="Kiemelt projektek"
           title="Projektek és portfólió"
           intro="A hangsúly az új irányon: szakmai szabályokra épülő, AI-vezérelt munkafolyamat és specifikációvezérelt alkalmazásgyártás."
-          className="border-y border-line bg-bg-elevated"
+          className="border-y border-line bg-bg-elevated/55"
         >
           <Projects />
         </Section>
@@ -161,7 +163,7 @@ export default function Home() {
           index="06"
           eyebrow="Tanulmányok, nyelvtudás és egyéb"
           title="Tanulmányok és nyelvek"
-          className="border-y border-line bg-bg-elevated"
+          className="border-y border-line bg-bg-elevated/55"
         >
           <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
             <ol className="space-y-4">

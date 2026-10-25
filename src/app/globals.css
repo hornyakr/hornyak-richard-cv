@@ -19,7 +19,8 @@
   --accent-soft: #dcefec;
   --accent-ink: #ffffff;
   --glow: rgb(29 117 109 / 0.16);
-  --grid: rgb(32 56 74 / 0.06);
+  --dot: #20384a;
+  --dot-alpha: 0.2;
 }
 
 [data-theme="dark"] {
@@ -38,7 +39,8 @@
   --accent-soft: #10302f;
   --accent-ink: #04201d;
   --glow: rgb(76 195 179 / 0.18);
-  --grid: rgb(228 239 238 / 0.045);
+  --dot: #cfe3e1;
+  --dot-alpha: 0.13;
 }
 
 @theme inline {
@@ -111,13 +113,10 @@
     @apply rounded-2xl border border-line bg-surface;
   }
 
-  /* Finom háttérrács a hero mögött. */
-  .bg-grid {
-    background-image:
-      linear-gradient(to right, var(--grid) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
-    background-size: 56px 56px;
-    mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black 30%, transparent 75%);
+  /* Körvonalas óriás fejezetszám a szekciók hátterében. */
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--line-strong);
   }
 
   /* Egérkövető fény a kártyákon (SpotlightCard állítja a változókat). */
