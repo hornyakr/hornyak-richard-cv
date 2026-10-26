@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
@@ -49,6 +50,8 @@ export function RootDocument({ locale, children }: { locale: Locale; children: R
         <ContentProvider value={{ cv, languages: languageOptions }}>
           <MotionProvider>{children}</MotionProvider>
         </ContentProvider>
+        {/* Vercel Web Analytics: süti nélküli látogatásmérés (élesben a Vercel szolgálja ki). */}
+        <Analytics />
       </body>
     </html>
   );

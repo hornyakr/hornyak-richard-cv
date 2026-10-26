@@ -10,6 +10,7 @@ Egyoldalas, statikusan generált önéletrajz-oldal: **Technical Business Analys
 - [Motion](https://motion.dev) (`LazyMotion` + `m.*`): „dynamic island” fejezetnavigáció, görgetésvezérelt fejezetváltások, rögzített vízszintes projektsáv, idővonal-kitöltés, mágneses gombok, felpörgő számok
 - Canvas 2D: egérkövető, kattintásra hullámzó pontháló a háttérben (függőség nélkül)
 - Natív CSS scroll-driven animációk (`animation-timeline: view()`) a szekciók megjelenéséhez
+- [Vercel Web Analytics](https://vercel.com/docs/analytics) (`@vercel/analytics`): süti nélküli látogatásmérés
 - ESLint (`eslint-config-next` + `eslint-config-prettier`), Prettier (`prettier-plugin-tailwindcss`)
 
 Minden animáció tiszteletben tartja a `prefers-reduced-motion` beállítást (CSS media query és `MotionConfig reducedMotion="user"`).
@@ -84,4 +85,4 @@ npx vercel --prod # éles deploy
 
 ## Adatvédelem
 
-A telefonszám szándékosan nem jelenik meg az oldal szövegében; a letölthető PDF-önéletrajz tartalmazza. A Winzard és az AI Workbench privát repó, ezért csak a leírásuk jelenik meg, link nélkül.
+A látogatásmérés a Vercel Web Analytics-szel történik, sütik és személyes azonosítók nélkül. A telefonszám szándékosan nem jelenik meg az oldal szövegében; a letölthető PDF-önéletrajz tartalmazza. A Winzard és az AI Workbench privát repó, ezért csak a leírásuk jelenik meg, link nélkül.
