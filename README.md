@@ -58,16 +58,21 @@ npm run dev
 
 Az oldal a http://localhost:3000 címen érhető el.
 
-| Parancs                | Leírás                                         |
-| ---------------------- | ---------------------------------------------- |
-| `npm run dev`          | fejlesztői szerver                             |
-| `npm run build`        | éles build (statikus generálás)                |
-| `npm run start`        | az éles build kiszolgálása                     |
-| `npm run lint`         | ESLint                                         |
-| `npm run typecheck`    | route-típusok generálása és `tsc --noEmit`     |
-| `npm run format`       | Prettier formázás                              |
-| `npm run format:check` | Prettier ellenőrzés                            |
-| `npm run check`        | lint + typecheck + formázás-ellenőrzés + build |
+| Parancs                | Leírás                                                           |
+| ---------------------- | ---------------------------------------------------------------- |
+| `npm run dev`          | fejlesztői szerver                                               |
+| `npm run build`        | éles build (statikus generálás)                                  |
+| `npm run start`        | az éles build kiszolgálása                                       |
+| `npm run lint`         | ESLint                                                           |
+| `npm run typecheck`    | route-típusok generálása és `tsc --noEmit`                       |
+| `npm run format`       | Prettier formázás                                                |
+| `npm run format:check` | Prettier ellenőrzés                                              |
+| `npm run trace`        | szerzőségi kapu a követett fájlokra                              |
+| `npm run check`        | szerzőségi kapu + lint + typecheck + formázás-ellenőrzés + build |
+
+Az `npm ci` a `prepare` szkripttel bekapcsolja a `.githooks/` alatti git hookokat: a commit-üzenet
+és a stage-elt fájlok nem hordozhatnak AI-szerzőségi jelölést vagy emojit (szabály: `AGENTS.md`,
+„Szerzőség”; kapu: `scripts/trace-check`).
 
 ## Telepítés Vercelre
 

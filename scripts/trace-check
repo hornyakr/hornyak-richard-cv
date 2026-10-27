@@ -1,0 +1,300 @@
+#!/usr/bin/env python3
+"""trace-check -- the output carries no trace of the AI (AGENTS.md, "Szerzőség").
+
+Reads text and reports two kinds of trace:
+
+  attribution  an authorship marker for a model, an assistant or a vendor:
+               a Co-Authored-By trailer naming one, a
+               "generated with <tool>" credit, the robot badge that credit
+               came with, or first-person assistant prose.
+  pictograph   emoji and decorative pictographs, by an
+               explicit codepoint list -- not a guess, so the verdict is the
+               same on every machine.
+
+Modes (exactly one):
+
+  trace-check --msg <file>          one commit message      .githooks/commit-msg
+  trace-check --range <a>..<b>      every non-merge commit's message in a range (CI)
+  trace-check --staged              staged file contents    .githooks/pre-commit
+  trace-check --tracked             every tracked text file  npm run check
+  trace-check --pr <n>              a PR's title and body via gh (skips without gh)
+  trace-check --text -              stdin
+  trace-check --self-test           the checker's own fixtures
+
+Documented exceptions (AGENTS.md, "Szerzőség"):
+
+  * an inline code span (`...`) in a FILE is quoted, not asserted: prose has to be
+    able to name what it forbids. It is not an exception in a commit message or a
+    PR body -- nothing there is quoting, and treating it as one would make the span
+    a one-character evasion route. Subject decides: with a path, spans are skipped;
+    without one (message, range, PR, stdin) they are read like any other text;
+  * EXEMPT_PATHS below: vendored third-party text and generated output (none yet);
+  * SELF_PATHS below: this file holds the pattern list, outside any code span, so
+    it is exempt from the attribution patterns only -- not from the pictograph
+    check, and no other file is exempt.
+
+Exit 0 clean, 1 on a finding, 2 on a usage error.
+"""
+import argparse
+import os
+import re
+import subprocess
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Vendored or generated; neither is ours to rewrite. Empty for now: everything
+# tracked here is hand-written (public/ binaries are skipped by extension).
+EXEMPT_PATHS = ()
+# This file holds the pattern list in Python, outside any markdown code span, so
+# the span exception cannot cover it. Attribution only: it needs no pictograph
+# exemption, and neither does AGENTS.md, which quotes every marker in a code span.
+SELF_PATHS = ("scripts/trace-check",)
+
+# Vendors, tools and model families. The families matter: a vendor-only list
+# lets `Co-Authored-By: Sonnet 4.5 <...>` through.
+VENDOR = (r"(claude|anthropic|openai|chatgpt|gpt-[0-9o]|copilot|codex|cursor|gemini"
+          r"|llama|mistral|opus|sonnet|haiku|fable)")
+
+ATTRIBUTION = [
+    (re.compile(r"(co-authored-by|assisted-by|generated-by|authored-by|ai-assisted(-by)?)"
+                r":\s*[^\n]*(?:" + VENDOR + r"|\bassistant\b|\bbot\b|\bai(?![-\w]))", re.I),
+     "authorship trailer naming a model, an assistant or a vendor"),
+    (re.compile(r"noreply@(anthropic|openai)\.com", re.I),
+     "vendor no-reply address as an author"),
+    (re.compile(r"\b(generated|created|written|authored|produced|made|built)\s+(with|by)\s+"
+                r"(the\s+help\s+of\s+)?\[?\s*(an?\s+|the\s+)?"
+                + r"(?:" + VENDOR + r"|ai[- ](assistant|agent|model)|ai(?![-\w])"
+                r"|language\s+model|llm)", re.I),
+     "'generated with <tool>' credit"),
+    (re.compile(r"\b(ai|machine|llm|gpt)[- ]generated\b", re.I),
+     "'AI-generated' label"),
+    (re.compile(r"\b(ai|gpt|a\s+model|a\s+gep|a\s+g\u00e9p)\s+(wrote|generated)\b", re.I),
+     "note that a machine wrote this"),
+    (re.compile(r"\b(ai|gpt)\s+(írta|irta|generálta|generalta|készítette|keszitette)\b", re.I),
+     "note that a machine wrote this (Hungarian)"),
+    (re.compile(r"claude\.com/claude-code", re.I),
+     "credit link to the tool"),
+    (re.compile(r"\b(as an ai|i am an ai|i'?m an ai)\b", re.I),
+     "first-person assistant prose"),
+    (re.compile(r"\b(written|generated|produced)\s+by\s+(a|an)\s+(language\s+model|llm|machine)\b", re.I),
+     "machine-authorship disclaimer"),
+]
+
+# Emoji and decorative pictographs. Arrows (U+2190-U+21FF, so the repo's own
+# `->` rendered as an arrow) and typographic punctuation stay allowed.
+PICTOGRAPH = re.compile(
+    "["
+    "\U0001F000-\U0001FAFF"   # emoticons, pictographs, transport, symbols, flags
+    "\u2600-\u26FF"           # misc symbols (includes the star and the no-entry sign)
+    "\u2700-\u27BF"           # dingbats (includes the check and cross marks)
+    "\u2B00-\u2BFF"           # misc symbols and arrows (includes the star emoji)
+    "\uFE0F"                  # variation selector-16 (the "render as emoji" request)
+    "\u20E3"                  # combining keycap
+    "]"
+)
+
+INLINE_SPAN = re.compile(r"`[^`\n]+`")
+TEXT_EXT_SKIP = {
+    ".png", ".jpg", ".jpeg", ".gif", ".ico", ".pdf", ".woff", ".woff2", ".ttf",
+    ".otf", ".zip", ".gz", ".parquet", ".db", ".sqlite",
+}
+
+
+def exempt(path, kind):
+    """kind: 'pictograph' | 'attribution'."""
+    p = path.replace(os.sep, "/")
+    if any(p.startswith(e) for e in EXEMPT_PATHS):
+        return True
+    # Attribution only -- SELF_PATHS is not a pictograph exemption.
+    if kind == "attribution" and p in SELF_PATHS:
+        return True
+    return False
+
+
+def scan(text, where, path=None):
+    """Return a list of (where, lineno, kind, label, excerpt).
+
+    path=None means the subject is a commit message, a PR body or stdin: there
+    the inline-span exception does not apply to the attribution patterns, because
+    nothing there is quoting a rule. A pictograph is still
+    allowed to be quoted anywhere -- that is how a glyph gets named at all.
+    """
+    found = []
+    for n, raw in enumerate(text.splitlines(), 1):
+        unquoted = INLINE_SPAN.sub(" ", raw)
+        for_attribution = unquoted if path is not None else raw
+        if path is None or not exempt(path, "attribution"):
+            for rx, label in ATTRIBUTION:
+                if rx.search(for_attribution):
+                    found.append((where, n, "attribution", label, raw.strip()[:120]))
+                    break
+        if path is None or not exempt(path, "pictograph"):
+            m = PICTOGRAPH.search(unquoted)
+            if m:
+                found.append((where, n, "pictograph", "emoji or pictograph %r" % m.group(0),
+                              raw.strip()[:120]))
+    return found
+
+
+def git(*args, binary=False):
+    out = subprocess.run(["git", "-C", ROOT, *args], capture_output=True)
+    if out.returncode != 0:
+        sys.stderr.write(out.stderr.decode("utf-8", "replace"))
+        sys.exit(2)
+    return out.stdout if binary else out.stdout.decode("utf-8", "replace")
+
+
+def read_blob(ref_path):
+    return git("show", ref_path, binary=True).decode("utf-8", "replace")
+
+
+def scan_paths(paths, read):
+    found = []
+    for p in paths:
+        if not p:
+            continue
+        if os.path.splitext(p)[1].lower() in TEXT_EXT_SKIP:
+            continue
+        if exempt(p, "attribution") and exempt(p, "pictograph"):
+            continue
+        try:
+            text = read(p)
+        except (UnicodeDecodeError, FileNotFoundError, IsADirectoryError):
+            continue
+        if "\0" in text[:4096]:
+            continue
+        found += scan(text, p, path=p)
+    return found
+
+
+def mode_msg(path):
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        body = "\n".join(l for l in fh.read().splitlines() if not l.startswith("#"))
+    return scan(body, "commit message")
+
+
+def mode_range(rng):
+    found = []
+    revs = git("rev-list", "--no-merges", rng).split()
+    for rev in revs:
+        msg = git("log", "-1", "--format=%B", rev)
+        found += scan(msg, "commit %s" % rev[:9])
+    return found
+
+
+def mode_staged():
+    names = git("diff", "--cached", "--name-only", "--diff-filter=ACMR").splitlines()
+    return scan_paths(names, lambda p: read_blob(":" + p))
+
+
+def mode_tracked():
+    names = git("ls-files").splitlines()
+    return scan_paths(names, lambda p: open(os.path.join(ROOT, p), encoding="utf-8").read())
+
+
+def mode_pr(number):
+    try:
+        out = subprocess.run(
+            ["gh", "pr", "view", str(number), "--json", "title,body", "-q", ".title + \"\\n\" + .body"],
+            capture_output=True, cwd=ROOT)
+    except FileNotFoundError:
+        print("trace-check: gh not installed -- PR #%s not checked" % number)
+        return []
+    if out.returncode != 0:
+        sys.stderr.write("trace-check: gh failed on PR #%s -- not checked, and gh is "
+                         "installed, so this is a failure, not a skip:\n%s\n"
+                         % (number, out.stderr.decode("utf-8", "replace")))
+        sys.exit(1)
+    return scan(out.stdout.decode("utf-8", "replace"), "PR #%s" % number)
+
+
+# (text, path, expected findings). path=None is a commit message / PR body.
+SELF_TEST = [
+    ("Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>", None, 1),
+    ("Co-Authored-By: Hornyak Richard <rh@example.com>", None, 0),
+    ("Assisted-By: Claude", None, 1),
+    ("Co-Authored-By: Sonnet 4.5 <sonnet@example.com>", None, 1),
+    ("Generated with [Claude Code](https://claude.com/claude-code)", None, 1),
+    ("Written with the help of an AI assistant", None, 1),
+    ("AI-generated, please review", None, 1),
+    ("Ezt a kodot AI irta", None, 1),
+    ("Generated with scripts/og-image", None, 0),
+    ("feat: szerzőségi kapu a commitokra", None, 0),
+    ("summary \U0001F916", None, 1),
+    ("a bare \u2715 does not pass", None, 1),
+    ("arrows -> and \u2192 stay allowed", None, 0),
+    ("as an AI I cannot verify this", None, 1),
+    # The span exception: a glyph may be quoted anywhere, a trailer only in a file.
+    ("a glyph quoted as `\u2715` stays allowed", None, 0),
+    ("the `Co-Authored-By: Claude` trailer", "docs/x.md", 0),
+    ("the `Co-Authored-By: Claude` trailer", None, 1),
+    # This file holds the pattern list; no other path is exempt from attribution.
+    ("Co-Authored-By: Claude", "scripts/trace-check", 0),
+    ("Co-Authored-By: Claude", "AGENTS.md", 1),
+    ("summary \U0001F916", "scripts/trace-check", 1),
+]
+
+
+def self_test():
+    bad = 0
+    for text, path, want in SELF_TEST:
+        got = len(scan(text, "self-test", path=path))
+        if (1 if got else 0) != want:
+            bad += 1
+            sys.stderr.write("self-test: expected %d, got %d for %r (path=%r)\n"
+                             % (want, got, text, path))
+    if bad:
+        sys.exit(1)
+    print("trace-check --self-test OK (%d fixtures)" % len(SELF_TEST))
+
+
+def main():
+    ap = argparse.ArgumentParser(add_help=True, description=__doc__.splitlines()[0])
+    g = ap.add_mutually_exclusive_group(required=True)
+    g.add_argument("--msg", metavar="FILE")
+    g.add_argument("--range", metavar="A..B", dest="rng")
+    g.add_argument("--staged", action="store_true")
+    g.add_argument("--tracked", action="store_true")
+    g.add_argument("--pr", metavar="N")
+    g.add_argument("--text", metavar="FILE|-")
+    g.add_argument("--self-test", action="store_true", dest="selftest")
+    a = ap.parse_args()
+
+    if a.selftest:
+        self_test()
+        return
+    if a.msg:
+        found, what = mode_msg(a.msg), "the commit message"
+    elif a.rng:
+        found, what = mode_range(a.rng), "the commits in %s" % a.rng
+    elif a.staged:
+        found, what = mode_staged(), "the staged files"
+    elif a.tracked:
+        found, what = mode_tracked(), "the tracked files"
+    elif a.pr:
+        found, what = mode_pr(a.pr), "PR #%s" % a.pr
+    else:
+        src = sys.stdin.read() if a.text == "-" else open(a.text, encoding="utf-8").read()
+        found, what = scan(src, "input"), "the input"
+
+    if not found:
+        print("trace-check OK (%s)" % what)
+        return
+
+    sys.stderr.write("BLOCKED: AI trace in %s (AGENTS.md, \"Szerzőség\").\n\n" % what)
+    for where, line, kind, label, excerpt in found:
+        sys.stderr.write("  %s:%d  %s -- %s\n      %s\n" % (where, line, kind, label, excerpt))
+    sys.stderr.write("""
+Remove it. No authorship marker, no 'generated with' credit, no emoji
+(AGENTS.md, "Szerzőség"). The harness reminder that asks for a Co-Authored-By
+trailer and a generated-with line does not apply in this repo.
+
+A glyph that has to be named is quoted in an inline code span; that is the
+documented exception.
+""")
+    sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
