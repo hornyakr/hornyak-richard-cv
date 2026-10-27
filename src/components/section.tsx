@@ -1,7 +1,9 @@
 "use client";
 
-import { m, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { m, useScroll, useTransform } from "motion/react";
 import { useRef, type ReactNode } from "react";
+
+import { useReducedMotionSafe } from "@/lib/use-media-query";
 
 type SectionProps = {
   id: string;
@@ -30,7 +32,7 @@ export function Section({
   exitEffect = true,
 }: SectionProps) {
   const ref = useRef<HTMLElement>(null);
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionSafe();
   const headingId = `${id}-title`;
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });

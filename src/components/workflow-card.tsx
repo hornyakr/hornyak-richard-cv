@@ -1,19 +1,34 @@
 "use client";
 
-import { m, useReducedMotion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
 import { CheckIcon, SparkIcon } from "@/components/icons";
 import { useContent } from "@/components/content-provider";
+import { useReducedMotionSafe } from "@/lib/use-media-query";
+import { useSlideFromPrevious, type Box } from "@/lib/use-slide-from-previous";
 
 const STEP_MS = 1800;
+
+/** Az aktív lépés pöttye: az előző lépés helyéről csúszik át. */
+function ActiveDot({ memoryRef }: { memoryRef: RefObject<Box | null> }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useSlideFromPrevious(
+    ref,
+    "ol",
+    memoryRef,
+    (from, to) => ({ x: [from.left - to.left, 0], y: [from.top - to.top, 0] }),
+    { type: "spring", stiffness: 300, damping: 30 },
+  );
+  return <span ref={ref} aria-hidden="true" className="ml-auto size-2 rounded-full bg-accent" />;
+}
 
 /** A munkafolyamat lépései, egy finoman végigfutó kiemeléssel. */
 export function WorkflowCard() {
   const { cv } = useContent();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionSafe();
   const steps = cv.workflowSteps;
   const [current, setCurrent] = useState(0);
+  const dotMemory = useRef<Box | null>(null);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -58,14 +73,7 @@ export function WorkflowCard() {
                 {done ? <CheckIcon /> : String(index + 1).padStart(2, "0")}
               </span>
               <span className="text-sm font-medium text-ink-heading">{step}</span>
-              {isActive && (
-                <m.span
-                  layoutId="workflow-active"
-                  aria-hidden="true"
-                  className="ml-auto size-2 rounded-full bg-accent"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              )}
+              {isActive && <ActiveDot memoryRef={dotMemory} />}
             </li>
           );
         })}

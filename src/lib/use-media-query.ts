@@ -23,3 +23,13 @@ export function useMediaQuery(query: string): boolean | null {
     () => null,
   );
 }
+
+/**
+ * `prefers-reduced-motion: reduce`, hidratálásbiztosan: hidratálásig `false`, mint a szerveren.
+ * A Motion `useReducedMotion`-je már a hidratáló rendernél a valódi értéket adja; ha a render
+ * függ tőle, a kliens eltér a szerver HTML-jétől (React #418), és a React eldobja a HTML-t és
+ * újrarenderel. Csak effektben használt értékhez maradhat a Motion-féle.
+ */
+export function useReducedMotionSafe(): boolean {
+  return useMediaQuery("(prefers-reduced-motion: reduce)") === true;
+}

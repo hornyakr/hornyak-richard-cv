@@ -1,7 +1,7 @@
 "use client";
 
-import { AnimatePresence, m, useMotionValueEvent, useScroll } from "motion/react";
-import { useEffect, useId, useRef, useState } from "react";
+import { animate, AnimatePresence, m, useMotionValueEvent, useScroll } from "motion/react";
+import { useEffect, useId, useRef, useState, type RefObject } from "react";
 
 import { fill, useContent } from "@/components/content-provider";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -9,6 +9,7 @@ import { RollingText } from "@/components/rolling-text";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { CV, SectionKey } from "@/content/types";
 import { useMediaQuery } from "@/lib/use-media-query";
+import { useSlideFromPrevious, type Box } from "@/lib/use-slide-from-previous";
 
 const spring = { type: "spring", stiffness: 420, damping: 36 } as const;
 
@@ -86,6 +87,65 @@ function useInitialHashScroll() {
   }, []);
 }
 
+/** Az aktív fejezet kiemelése a kinyitott menüben: az előző fejezet helyéről csúszik át. */
+function NavPill({ memoryRef }: { memoryRef: RefObject<Box | null> }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useSlideFromPrevious(
+    ref,
+    "ul",
+    memoryRef,
+    (from, to) => ({ left: [from.left - to.left, 0], right: [to.right - from.right, 0] }),
+    spring,
+  );
+  return (
+    <span
+      ref={ref}
+      aria-hidden="true"
+      className="absolute inset-0 -z-10 rounded-full bg-surface-muted"
+    />
+  );
+}
+
+/**
+ * A kapszula a tartalma méretére animál a Motion `layout` helyett, mert az a layout-funkciókkal
+ * minden `m` elemhez layout-mérést kapcsolna (lásd `useSlideFromPrevious`). Mérésig (és a
+ * szerveren) természetes méretű, utána mindig explicit méretet kap, és arról animál tovább.
+ * A `box` `box-sizing: content-box`, így a szélessége egyenlő a tartaloméval.
+ */
+function useMorphToContent(
+  boxRef: RefObject<HTMLElement | null>,
+  contentRef: RefObject<HTMLElement | null>,
+) {
+  useEffect(() => {
+    const box = boxRef.current;
+    const content = contentRef.current;
+    if (!box || !content) return;
+    let controls: ReturnType<typeof animate> | undefined;
+    const observer = new ResizeObserver(([entry]) => {
+      const { inlineSize: width, blockSize: height } = entry!.borderBoxSize[0]!;
+      const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      controls?.stop();
+      if (!box.style.width || reduceMotion) {
+        box.style.width = `${width}px`;
+        box.style.height = `${height}px`;
+        return;
+      }
+      // A futó animáció közbenső értékéről folytatja.
+      const from = getComputedStyle(box);
+      controls = animate(
+        box,
+        { width: [parseFloat(from.width), width], height: [parseFloat(from.height), height] },
+        spring,
+      );
+    });
+    observer.observe(content);
+    return () => {
+      observer.disconnect();
+      controls?.stop();
+    };
+  }, [boxRef, contentRef]);
+}
+
 /** Görgetéssel kitöltődő gyűrű: a teljes oldal olvasottsága. */
 function ProgressRing({ progress }: { progress: ReturnType<typeof useScroll>["scrollYProgress"] }) {
   return (
@@ -125,6 +185,10 @@ export function SiteHeader() {
   const [hovered, setHovered] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const pillMemory = useRef<Box | null>(null);
+  const capsuleRef = useRef<HTMLDivElement>(null);
+  const capsuleContentRef = useRef<HTMLDivElement>(null);
+  useMorphToContent(capsuleRef, capsuleContentRef);
   const menuId = useId();
 
   useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 80));
@@ -152,14 +216,7 @@ export function SiteHeader() {
             aria-current={active === key ? "location" : undefined}
             className="relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-ink-muted transition-colors hover:text-ink-heading aria-[current=location]:text-ink-heading"
           >
-            {active === key && (
-              <m.span
-                layoutId="nav-pill"
-                aria-hidden="true"
-                className="absolute inset-0 -z-10 rounded-full bg-surface-muted"
-                transition={spring}
-              />
-            )}
+            {active === key && <NavPill memoryRef={pillMemory} />}
             <span aria-hidden="true" className="font-mono text-[10px] text-accent">
               {String(index + 1).padStart(2, "0")}
             </span>
@@ -244,22 +301,22 @@ export function SiteHeader() {
           }}
           className="pointer-events-auto relative"
         >
-          <m.div
-            layout
-            transition={spring}
-            style={{ borderRadius: 999 }}
-            className="border border-line bg-surface/75 p-1.5 shadow-[0_18px_50px_-24px_rgb(0_0_0/0.35)] backdrop-blur-xl"
+          <div
+            ref={capsuleRef}
+            className="box-content rounded-full border border-line bg-surface/75 p-1.5 shadow-[0_18px_50px_-24px_rgb(0_0_0/0.35)] backdrop-blur-xl"
           >
-            <AnimatePresence mode="popLayout" initial={false}>
-              {isDesktop === null
-                ? // Hidratálás előtt még nem tudjuk a képernyőméretet: mindkét változat a HTML-ben van,
-                  // és CSS dönt, így asztalon nem a kapszula villan fel, majd ugrik át a teljes menüre.
-                  [inlineNav("hidden min-[1200px]:flex"), compactNav("min-[1200px]:hidden")]
-                : inline
-                  ? inlineNav()
-                  : compactNav()}
-            </AnimatePresence>
-          </m.div>
+            <div ref={capsuleContentRef} className="w-max">
+              <AnimatePresence mode="popLayout" initial={false}>
+                {isDesktop === null
+                  ? // Hidratálás előtt még nem tudjuk a képernyőméretet: mindkét változat a HTML-ben van,
+                    // és CSS dönt, így asztalon nem a kapszula villan fel, majd ugrik át a teljes menüre.
+                    [inlineNav("hidden min-[1200px]:flex"), compactNav("min-[1200px]:hidden")]
+                  : inline
+                    ? inlineNav()
+                    : compactNav()}
+              </AnimatePresence>
+            </div>
+          </div>
 
           <AnimatePresence>
             {dropdownOpen && (
