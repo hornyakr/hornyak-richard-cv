@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# A stage-elt fájlok nem hordoznak szerzőségi jelölést és emojit (AGENTS.md, "Szerzőség").
+# Minden commitnál fut. Egyszeri felülírás: ALLOW_AI_TRACE=1 git commit ...
+set -euo pipefail
+[ "${ALLOW_AI_TRACE:-0}" = "1" ] && exit 0
+root="$(git rev-parse --show-toplevel)"
+exec "$root/scripts/trace-check" --staged

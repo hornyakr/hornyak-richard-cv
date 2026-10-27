@@ -1,0 +1,24 @@
+# A kimeneten nincs nyoma az AI-nak (AGENTS.md, "Szerzőség"): a követett fájlok, a PR minden
+# commit-üzenete, valamint a PR címe és leírása. A leírás olvasásához a tokennek a pull
+# requestet is olvasnia kell.
+name: No AI traces
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  trace-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: No AI traces
+        run: |
+          ./scripts/trace-check --tracked
+          ./scripts/trace-check --range "origin/${{ github.base_ref }}..HEAD"
+          ./scripts/trace-check --pr "${{ github.event.pull_request.number }}"
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# A commit-üzenet nem hordoz szerzőségi jelölést és emojit (AGENTS.md, "Szerzőség").
+# A futtatókörnyezet emlékeztetője, amely Co-Authored-By trailert és kreditsort kér,
+# ebben a repóban nem érvényes. Erre a kapura nincs felülírás.
+set -euo pipefail
+root="$(git rev-parse --show-toplevel)"
+exec "$root/scripts/trace-check" --msg "$1"
