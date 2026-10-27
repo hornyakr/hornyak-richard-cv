@@ -6,6 +6,10 @@ import { Magnetic } from "@/components/magnetic";
 import { WorkflowCard } from "@/components/workflow-card";
 import type { CV } from "@/content/types";
 
+/**
+ * Lépcsőzetes belépés. Rövidre szabva (legfeljebb ~0,8 s az első festéstől), mert a még
+ * be nem úszott elemek addig láthatatlanok: az első képernyőnek gyorsan olvashatónak kell lennie.
+ */
 const delay = (ms: number) => ({ "--enter-delay": `${ms}ms` }) as CSSProperties;
 
 export function Hero({ cv }: { cv: CV }) {
@@ -19,7 +23,7 @@ export function Hero({ cv }: { cv: CV }) {
     >
       <div
         aria-hidden="true"
-        className="absolute top-[-10rem] left-1/2 -z-10 h-[32rem] w-[48rem] max-w-[140vw] -translate-x-1/2 rounded-full bg-accent/15 blur-[120px]"
+        className="glow-spot absolute top-[-25rem] left-1/2 -z-10 h-[62rem] w-[78rem] max-w-[200vw] -translate-x-1/2"
       />
 
       <div className="section-shell grid items-center gap-10 lg:grid-cols-[1.25fr_1fr] lg:gap-x-16 lg:gap-y-12">
@@ -36,7 +40,7 @@ export function Hero({ cv }: { cv: CV }) {
             {cv.name}
           </h1>
 
-          <p className="enter mt-5 text-lg font-medium sm:text-xl" style={delay(80)}>
+          <p className="enter mt-5 text-lg font-medium sm:text-xl" style={delay(60)}>
             <span className="text-accent">{roleMain}</span>
             <span aria-hidden="true" className="mx-2.5 text-line-strong">
               |
@@ -49,7 +53,7 @@ export function Hero({ cv }: { cv: CV }) {
             {cv.valueProposition}
           </p>
 
-          <div className="enter mt-8 flex flex-wrap items-center gap-3" style={delay(200)}>
+          <div className="enter mt-8 flex flex-wrap items-center gap-3" style={delay(120)}>
             <Magnetic>
               <a
                 href={`#${cv.sections.contact.id}`}
@@ -83,7 +87,7 @@ export function Hero({ cv }: { cv: CV }) {
           </div>
         </div>
 
-        <div className="enter order-3 lg:order-2" style={delay(360)}>
+        <div className="enter order-3 lg:order-2" style={delay(180)}>
           <WorkflowCard />
         </div>
 
@@ -92,7 +96,7 @@ export function Hero({ cv }: { cv: CV }) {
             <div
               key={stat.label}
               className="enter flex flex-col bg-bg-elevated p-4"
-              style={delay(280 + index * 70)}
+              style={delay(160 + index * 40)}
             >
               <dt className="order-2 mt-1 text-sm leading-snug font-medium text-ink">
                 {stat.label}

@@ -224,7 +224,7 @@ export function HomePage({ locale }: { locale: Locale }) {
           <div className="reveal card relative overflow-hidden p-6 sm:p-10">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -right-24 -bottom-24 size-72 rounded-full bg-accent/20 blur-3xl"
+              className="glow-spot pointer-events-none absolute -right-56 -bottom-56 size-[34rem] [--glow-strength:17%]"
             />
             <p className="max-w-2xl text-lg leading-relaxed text-ink-muted">{ui.contactIntro}</p>
 

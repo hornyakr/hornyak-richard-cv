@@ -1,7 +1,5 @@
 "use client";
 
-import { m } from "motion/react";
-
 import { useContent } from "@/components/content-provider";
 import type { SectionKey } from "@/content/types";
 
@@ -25,13 +23,9 @@ export function LanguageSwitcher({ activeSection }: { activeSection: SectionKey 
           const current = option.locale === cv.locale;
           return (
             <li key={option.locale} className="relative">
+              {/* A nyelvváltás új oldalt tölt be, így a kiemelésnek nincs honnan átcsúsznia. */}
               {current && (
-                <m.span
-                  layoutId="language-pill"
-                  aria-hidden="true"
-                  className="absolute inset-0 rounded-full bg-accent"
-                  transition={{ type: "spring", stiffness: 420, damping: 36 }}
-                />
+                <span aria-hidden="true" className="absolute inset-0 rounded-full bg-accent" />
               )}
               <a
                 href={hrefFor(option)}

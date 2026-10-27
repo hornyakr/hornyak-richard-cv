@@ -13,6 +13,8 @@ const format = (value: number, separator: string) =>
 /**
  * Láthatóvá váláskor nulláról „felpörgő” szám. A szerver a végleges értéket
  * rendereli, így keresők és JavaScript nélküli böngészők is a valós adatot látják.
+ * Ami már a betöltéskor a képernyőn van, az a végleges értéken marad: különben a
+ * hidratálás után a látott szám visszaugrana nullára.
  */
 export function CountUp({ value }: { value: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -22,9 +24,16 @@ export function CountUp({ value }: { value: string }) {
   const target = match ? Number(match[1]!.replace(/\D/g, "")) : null;
   const separator = match?.[1]!.match(/\D/)?.[0] === "," ? "," : "\u00a0";
   const [display, setDisplay] = useState<string | null>(null);
+  const visibleOnLoad = useRef<boolean | null>(null);
+
+  // Az IntersectionObserver aszinkron jelez, ez a hatás tehát előbb fut le, mint az animációé.
+  useEffect(() => {
+    const rect = ref.current?.getBoundingClientRect();
+    visibleOnLoad.current = rect ? rect.top < window.innerHeight && rect.bottom > 0 : false;
+  }, []);
 
   useEffect(() => {
-    if (target === null || reduceMotion || !inView) return;
+    if (target === null || reduceMotion || !inView || visibleOnLoad.current) return;
     const controls = animate(0, target, {
       duration: target > 100 ? 1.6 : 0.9,
       ease: [0.16, 1, 0.3, 1],
