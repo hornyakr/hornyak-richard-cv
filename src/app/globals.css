@@ -2,6 +2,8 @@
 
 /* A téma a <html data-theme> attribútumot követi (lásd ThemeScript). */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* A vízszintes projektsáv feltétele; egyezzen a ProjectsShowcase media queryjével. */
+@custom-variant track (@media (min-width: 1024px) and (min-height: 680px) and (prefers-reduced-motion: no-preference));
 
 :root {
   color-scheme: light;

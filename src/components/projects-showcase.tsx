@@ -27,6 +27,20 @@ const trackItems = (cv: CV): TrackItem[] =>
     ...group.projects.map((project) => ({ kind: "project" as const, group, project })),
   ]);
 
+// A sáv méretei: a CSS-ből számolt magasság csak akkor pontos, ha ezek egyeznek az osztályokkal.
+const INTRO_REM = 22; // w-[22rem]
+const CARD_REM = 32; // w-[min(32rem,78vw)], 1024 px felett mindig 32rem
+const GAP_REM = 1.5; // gap-6
+const TRACK_PADDING = "max(1.5rem, calc((100vw - 72rem) / 2 + 2rem))";
+
+/** A sáv vízszintes útja tisztán CSS-ből, hogy a szerveren is a végleges magasságot rendereljük. */
+const cssDistance = (items: TrackItem[]) => {
+  const intros = items.filter((item) => item.kind === "intro").length;
+  const rem =
+    intros * INTRO_REM + (items.length - intros) * CARD_REM + (items.length - 1) * GAP_REM;
+  return `max(0px, ${rem}rem + 2 * ${TRACK_PADDING} - 100vw)`;
+};
+
 /**
  * Rögzített, vízszintes projektsáv: a függőleges görgetés oldalirányban viszi
  * végig a kártyákat. Csak elég nagy képernyőn és engedélyezett mozgásnál.
@@ -36,7 +50,8 @@ function ProjectsTrack() {
   const items = useMemo(() => trackItems(cv), [cv]);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLUListElement>(null);
-  const [distance, setDistance] = useState(0);
+  // Mérésig (és a szerveren) `null`: ilyenkor a CSS-ből számolt út adja a magasságot.
+  const [distance, setDistance] = useState<number | null>(null);
   const distanceValue = useMotionValue(0);
   const [activeGroup, setActiveGroup] = useState(items[0]!.group.title);
 
@@ -73,14 +88,16 @@ function ProjectsTrack() {
   return (
     <div
       ref={containerRef}
-      style={{ height: `calc(100svh + ${distance}px)` }}
+      style={{
+        height: `calc(100svh + ${distance === null ? cssDistance(items) : `${distance}px`})`,
+      }}
       className="relative mx-[calc(50%-50vw)]"
     >
       <div className="sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden pt-16">
         <m.ul
           ref={trackRef}
-          style={{ x }}
-          className="flex w-max items-stretch gap-6 px-[max(1.5rem,calc((100vw-72rem)/2+2rem))]"
+          style={{ x, paddingInline: TRACK_PADDING }}
+          className="flex w-max items-stretch gap-6"
         >
           {items.map((item) =>
             item.kind === "intro" ? (
@@ -127,9 +144,27 @@ function ProjectsTrack() {
   );
 }
 
+/**
+ * Hidratálásig (és a szerveren) mindkét változat kirenderelődik, és a `track` töréspont
+ * választ közöttük CSS-ből; különben asztalon a rács hidratálás után sávra cserélődne, és az
+ * oldal magassága ugrana. Utána csak a látható marad meg, a pozíciók miatt újracsatolás nélkül.
+ */
 export function ProjectsShowcase() {
   const horizontal = useMediaQuery(
     "(min-width: 1024px) and (min-height: 680px) and (prefers-reduced-motion: no-preference)",
   );
-  return horizontal ? <ProjectsTrack /> : <ProjectsGrid />;
+  return (
+    <>
+      {horizontal !== true && (
+        <div className={horizontal === null ? "track:hidden" : undefined}>
+          <ProjectsGrid />
+        </div>
+      )}
+      {horizontal !== false && (
+        <div className={horizontal === null ? "hidden track:block" : undefined}>
+          <ProjectsTrack />
+        </div>
+      )}
+    </>
+  );
 }
