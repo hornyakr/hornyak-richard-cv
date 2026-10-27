@@ -28,7 +28,7 @@ export function WorkflowCard() {
     <figure className="card relative overflow-hidden p-5 shadow-[0_30px_80px_-40px_var(--glow)] sm:p-6">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-24 -right-20 size-56 rounded-full bg-accent/20 blur-3xl"
+        className="glow-spot pointer-events-none absolute -top-56 -right-52 size-[30rem] [--glow-strength:17%]"
       />
       <figcaption className="mb-5 flex items-center justify-between gap-3">
         <span className="eyebrow">

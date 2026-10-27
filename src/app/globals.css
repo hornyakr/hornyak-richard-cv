@@ -113,6 +113,23 @@
     @apply rounded-2xl border border-line bg-surface;
   }
 
+  /*
+   * Lágy fényfolt. Radiális gradiens a nagy sugarú filter: blur() helyett: ugyanaz a látvány,
+   * de a böngészőnek nem kell külön réteget és több száz pixeles elmosást számolnia
+   * (mobil és integrált GPU-n ez lassítja az első festést és a görgetést).
+   */
+  .glow-spot {
+    --glow-strength: 15%;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in oklab, var(--accent) var(--glow-strength), transparent) 0%,
+      color-mix(in oklab, var(--accent) calc(var(--glow-strength) * 0.85), transparent) 30%,
+      color-mix(in oklab, var(--accent) calc(var(--glow-strength) * 0.5), transparent) 55%,
+      color-mix(in oklab, var(--accent) calc(var(--glow-strength) * 0.18), transparent) 78%,
+      transparent 100%
+    );
+  }
+
   /* Körvonalas óriás fejezetszám a szekciók hátterében. */
   .text-outline {
     color: transparent;
@@ -148,7 +165,7 @@
 /* Mozgás: csak ha a felhasználó nem kért csökkentett mozgást. */
 @media (prefers-reduced-motion: no-preference) {
   .enter {
-    animation: enter 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: enter 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--enter-delay, 0ms);
   }
 
@@ -171,7 +188,7 @@
 @keyframes enter {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;

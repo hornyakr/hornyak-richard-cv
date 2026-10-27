@@ -57,8 +57,17 @@ export function ThemeToggle() {
       title={next === "dark" ? ui.themeDarkTitle : ui.themeLightTitle}
       className="relative grid size-10 place-items-center overflow-hidden rounded-full border border-line bg-surface/70 text-ink transition-colors hover:border-line-strong hover:text-accent"
     >
-      <AnimatePresence initial={false} mode="wait">
-        {theme && (
+      {theme === null ? (
+        // Hidratálás előtt a téma még ismeretlen a React számára, de a ThemeScript már beállította:
+        // a helyes ikont CSS választja ki, így a gomb nem üres az első képernyőn.
+        <span className="grid place-items-center text-lg">
+          <SunIcon className="dark:hidden" />
+          <MoonIcon className="hidden dark:block" />
+        </span>
+      ) : (
+        // Hidratálás után frissen mountolt AnimatePresence: az initial={false} miatt az első ikon
+        // animáció nélkül jelenik meg, csak a későbbi váltások animáltak.
+        <AnimatePresence initial={false} mode="wait">
           <m.span
             key={theme}
             initial={{ y: 14, opacity: 0, rotate: -45 }}
@@ -69,8 +78,8 @@ export function ThemeToggle() {
           >
             {theme === "dark" ? <MoonIcon /> : <SunIcon />}
           </m.span>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>
+      )}
     </button>
   );
 }
