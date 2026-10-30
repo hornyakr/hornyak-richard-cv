@@ -21,13 +21,22 @@ function Tags({ tags }: { tags: readonly string[] }) {
   );
 }
 
-export function ProjectCard({ project, featured }: { project: Project; featured?: boolean }) {
+export function ProjectCard({
+  project,
+  featured,
+  lift = true,
+}: {
+  project: Project;
+  featured?: boolean;
+  /** Rámutatáskor finoman megemelkedik (a mozgó sávban kikapcsolva). */
+  lift?: boolean;
+}) {
   const { ui } = useContent().cv;
   return (
     <SpotlightCard
-      className={`card flex h-full flex-col p-6 transition-[border-color,transform] duration-300 hover:border-line-strong motion-safe:hover:-translate-y-1 sm:p-7 ${
-        featured ? "border-accent/35" : ""
-      }`}
+      className={`card flex h-full flex-col p-6 transition-[border-color,transform] duration-300 hover:border-line-strong sm:p-7 ${
+        lift ? "motion-safe:hover:-translate-y-1" : ""
+      } ${featured ? "border-accent/35" : ""}`}
     >
       <header>
         <p className="font-mono text-xs text-ink-muted">{project.context}</p>

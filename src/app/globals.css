@@ -188,6 +188,48 @@
   }
 }
 
+/*
+ * Vízszintes projektsáv: ahol a böngésző ismeri a görgetésvezérelt animációt, a sáv eltolását és a
+ * haladásjelzőt a kompozitor szál viszi, a görgetéssel képkockára egyezően. A konténer magassága
+ * 100svh + --track-distance, így a „contain” tartomány pontosan a rögzített szakasz.
+ */
+@supports (animation-timeline: view()) {
+  .projects-track-scope {
+    view-timeline-name: --projects-track;
+  }
+
+  .projects-track,
+  .projects-track-progress {
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: --projects-track;
+    animation-range: contain 0% contain 100%;
+  }
+
+  .projects-track {
+    animation-name: projects-track-slide;
+  }
+
+  .projects-track-progress {
+    animation-name: projects-track-progress;
+  }
+}
+
+@keyframes projects-track-slide {
+  to {
+    transform: translateX(calc(-1 * var(--track-distance)));
+  }
+}
+
+@keyframes projects-track-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

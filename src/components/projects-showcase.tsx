@@ -8,7 +8,14 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+} from "react";
 
 import { fill, useContent } from "@/components/content-provider";
 import { SparkIcon } from "@/components/icons";
@@ -41,6 +48,20 @@ const cssDistance = (items: TrackItem[]) => {
   return `max(0px, ${rem}rem + 2 * ${TRACK_PADDING} - 100vw)`;
 };
 
+const noSubscription = () => () => {};
+
+/**
+ * Ismeri-e a böngésző a görgetésvezérelt CSS-animációt. A szerveren és hidratáláskor `false`
+ * (a JS-es mozgás), utána a valódi érték; a CSS-animáció felülírja a közben beállított inline transzformot.
+ */
+function useScrollTimelineSupport() {
+  return useSyncExternalStore(
+    noSubscription,
+    () => CSS.supports("animation-timeline: view()"),
+    () => false,
+  );
+}
+
 /**
  * Rögzített, vízszintes projektsáv: a függőleges görgetés oldalirányban viszi
  * végig a kártyákat. Csak elég nagy képernyőn és engedélyezett mozgásnál.
@@ -54,6 +75,10 @@ function ProjectsTrack() {
   const [distance, setDistance] = useState<number | null>(null);
   const distanceValue = useMotionValue(0);
   const [activeGroup, setActiveGroup] = useState(items[0]!.group.title);
+  // Görgetésvezérelt CSS-animációval a mozgás a kompozitor szálon fut, a görgetéssel szinkronban;
+  // e nélkül (pl. Firefox) a JS-es, rugóval simított eltolás a tartalék.
+  const cssDriven = useScrollTimelineSupport();
+  const trackDistance = distance === null ? cssDistance(items) : `${distance}px`;
 
   useEffect(() => {
     const track = trackRef.current;
@@ -88,16 +113,19 @@ function ProjectsTrack() {
   return (
     <div
       ref={containerRef}
-      style={{
-        height: `calc(100svh + ${distance === null ? cssDistance(items) : `${distance}px`})`,
-      }}
-      className="relative mx-[calc(50%-50vw)]"
+      style={
+        {
+          height: `calc(100svh + ${trackDistance})`,
+          "--track-distance": trackDistance,
+        } as CSSProperties
+      }
+      className="projects-track-scope relative mx-[calc(50%-50vw)]"
     >
       <div className="sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden pt-16">
         <m.ul
           ref={trackRef}
-          style={{ x, paddingInline: TRACK_PADDING }}
-          className="flex w-max items-stretch gap-6"
+          style={cssDriven ? { paddingInline: TRACK_PADDING } : { x, paddingInline: TRACK_PADDING }}
+          className="projects-track flex w-max items-stretch gap-6 will-change-transform"
         >
           {items.map((item) =>
             item.kind === "intro" ? (
@@ -121,7 +149,8 @@ function ProjectsTrack() {
               </li>
             ) : (
               <li key={item.project.title} className="flex w-[min(32rem,78vw)] shrink-0">
-                <ProjectCard project={item.project} featured={item.group.featured} />
+                {/* A sávban a kártyák a kurzor alatt haladnak el: nincs felemelkedés, ami közben ugrálna. */}
+                <ProjectCard project={item.project} featured={item.group.featured} lift={false} />
               </li>
             ),
           )}
@@ -131,8 +160,8 @@ function ProjectsTrack() {
           <RollingText value={activeGroup} className="font-mono text-xs text-ink-muted" />
           <div className="relative h-px flex-1 overflow-hidden bg-line">
             <m.div
-              style={{ scaleX: scrollYProgress }}
-              className="absolute inset-0 origin-left bg-accent"
+              style={cssDriven ? undefined : { scaleX: scrollYProgress }}
+              className="projects-track-progress absolute inset-0 origin-left bg-accent"
             />
           </div>
           <span className="font-mono text-xs text-ink-muted" aria-hidden="true">
