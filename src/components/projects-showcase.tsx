@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  m,
-  useMotionValue,
-  useMotionValueEvent,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "motion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { m, useMotionValue, useMotionValueEvent, useScroll, useTransform } from "motion/react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { fill, useContent } from "@/components/content-provider";
 import { SparkIcon } from "@/components/icons";
@@ -16,6 +9,7 @@ import { ProjectCard, ProjectsGrid } from "@/components/projects";
 import { RollingText } from "@/components/rolling-text";
 import type { CV, Project, ProjectGroup } from "@/content/types";
 import { useMediaQuery } from "@/lib/use-media-query";
+import { useScrollTimelineSupport } from "@/lib/use-scroll-timeline";
 
 type TrackItem =
   | { kind: "intro"; group: ProjectGroup }
@@ -31,6 +25,8 @@ const trackItems = (cv: CV): TrackItem[] =>
 const INTRO_REM = 22; // w-[22rem]
 const CARD_REM = 32; // w-[min(32rem,78vw)], 1024 px felett mindig 32rem
 const GAP_REM = 1.5; // gap-6
+/** Mérés előtti lépésszám (≈ a sáv útja px-ben 1440 px széles nézetnél). */
+const APPROX_TRACK_STEPS = 3200;
 const TRACK_PADDING = "max(1.5rem, calc((100vw - 72rem) / 2 + 2rem))";
 
 /** A sáv vízszintes útja tisztán CSS-ből, hogy a szerveren is a végleges magasságot rendereljük. */
@@ -54,6 +50,10 @@ function ProjectsTrack() {
   const [distance, setDistance] = useState<number | null>(null);
   const distanceValue = useMotionValue(0);
   const [activeGroup, setActiveGroup] = useState(items[0]!.group.title);
+  // Görgetésvezérelt CSS-animációval a mozgás a kompozitor szálon fut, a görgetéssel szinkronban;
+  // e nélkül (pl. Firefox) a JS-es, rugóval simított eltolás a tartalék.
+  const cssDriven = useScrollTimelineSupport();
+  const trackDistance = distance === null ? cssDistance(items) : `${distance}px`;
 
   useEffect(() => {
     const track = trackRef.current;
@@ -77,8 +77,10 @@ function ProjectsTrack() {
     target: containerRef,
     offset: ["start start", "end end"],
   });
-  const rawX = useTransform(() => -scrollYProgress.get() * distanceValue.get());
-  const x = useSpring(rawX, { stiffness: 260, damping: 42, mass: 0.4 });
+  // Tartalék (görgetésvezérelt CSS-animáció nélkül): az eltolás rugó nélkül, közvetlenül a görgetést
+  // követi (a simítás lemaradást és továbbcsúszást okozott), egész pixelre kerekítve, hogy a szöveg
+  // ne remegjen.
+  const x = useTransform(() => Math.round(-scrollYProgress.get() * distanceValue.get()));
 
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     const index = Math.min(items.length - 1, Math.floor(progress * items.length));
@@ -88,51 +90,65 @@ function ProjectsTrack() {
   return (
     <div
       ref={containerRef}
-      style={{
-        height: `calc(100svh + ${distance === null ? cssDistance(items) : `${distance}px`})`,
-      }}
-      className="relative mx-[calc(50%-50vw)]"
+      style={
+        {
+          height: `calc(100svh + ${trackDistance})`,
+          "--track-distance": trackDistance,
+          // Egy lépés egy pixel; mérésig a CSS-ből számolt út egy közelítő lépésszámmal.
+          "--track-steps": distance === null ? APPROX_TRACK_STEPS : Math.max(1, distance),
+        } as CSSProperties
+      }
+      className="projects-track-scope relative mx-[calc(50%-50vw)]"
     >
       <div className="sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden pt-16">
-        <m.ul
-          ref={trackRef}
-          style={{ x, paddingInline: TRACK_PADDING }}
-          className="flex w-max items-stretch gap-6"
-        >
-          {items.map((item) =>
-            item.kind === "intro" ? (
-              <li key={`intro-${item.group.id}`} className="flex w-[22rem] shrink-0">
-                <div
-                  className={`flex w-full flex-col justify-end rounded-2xl p-7 ${
-                    item.group.featured
-                      ? "border border-accent/30 bg-accent-soft/70"
-                      : "border border-dashed border-line-strong"
-                  }`}
-                >
-                  {item.group.featured && <SparkIcon className="mb-auto text-3xl text-accent" />}
-                  <p className="eyebrow">
-                    {fill(cv.ui.projectCount, { count: item.group.projects.length })}
-                  </p>
-                  <h3 className="mt-3 font-display text-3xl leading-tight font-semibold tracking-tight">
-                    {item.group.title}
-                  </h3>
-                  <p className="mt-3 leading-relaxed text-ink-muted">{item.group.intro}</p>
-                </div>
-              </li>
-            ) : (
-              <li key={item.project.title} className="flex w-[min(32rem,78vw)] shrink-0">
-                <ProjectCard project={item.project} featured={item.group.featured} />
-              </li>
-            ),
-          )}
-        </m.ul>
+        {/*
+         * Két réteg, hogy a két mozgatás ne írja felül egymást: a burkolót a görgetésvezérelt
+         * CSS-animáció tolja (globals.css), a listát a Motion-os tartalék. Az egyik mindig nyugalomban van.
+         */}
+        <div className="projects-track w-max">
+          <m.ul
+            ref={trackRef}
+            style={
+              cssDriven ? { paddingInline: TRACK_PADDING } : { x, paddingInline: TRACK_PADDING }
+            }
+            className={`flex w-max items-stretch gap-6 ${cssDriven ? "" : "will-change-transform"}`}
+          >
+            {items.map((item) =>
+              item.kind === "intro" ? (
+                <li key={`intro-${item.group.id}`} className="flex w-[22rem] shrink-0">
+                  <div
+                    className={`flex w-full flex-col justify-end rounded-2xl p-7 ${
+                      item.group.featured
+                        ? "border border-accent/30 bg-accent-soft/70"
+                        : "border border-dashed border-line-strong"
+                    }`}
+                  >
+                    {item.group.featured && <SparkIcon className="mb-auto text-3xl text-accent" />}
+                    <p className="eyebrow">
+                      {fill(cv.ui.projectCount, { count: item.group.projects.length })}
+                    </p>
+                    <h3 className="mt-3 font-display text-3xl leading-tight font-semibold tracking-tight">
+                      {item.group.title}
+                    </h3>
+                    <p className="mt-3 leading-relaxed text-ink-muted">{item.group.intro}</p>
+                  </div>
+                </li>
+              ) : (
+                <li key={item.project.title} className="flex w-[min(32rem,78vw)] shrink-0">
+                  {/* A sávban a kártyák a kurzor alatt haladnak el: nincs felemelkedés, ami közben ugrálna. */}
+                  <ProjectCard project={item.project} featured={item.group.featured} lift={false} />
+                </li>
+              ),
+            )}
+          </m.ul>
+        </div>
 
         <div className="section-shell mt-8 flex items-center gap-5">
           <RollingText value={activeGroup} className="font-mono text-xs text-ink-muted" />
           <div className="relative h-px flex-1 overflow-hidden bg-line">
             <m.div
-              style={{ scaleX: scrollYProgress }}
-              className="absolute inset-0 origin-left bg-accent"
+              style={cssDriven ? undefined : { scaleX: scrollYProgress }}
+              className="projects-track-progress absolute inset-0 origin-left bg-accent"
             />
           </div>
           <span className="font-mono text-xs text-ink-muted" aria-hidden="true">
