@@ -13,13 +13,14 @@ type SectionProps = {
   intro?: string;
   children: ReactNode;
   className?: string;
-  /** Kilépéskor a tartalom finoman hátrébb lép (rögzített elemeknél kikapcsolandó). */
+  /** Kilépéskor a tartalom elhalványul (rögzített elemeknél kikapcsolandó). */
   exitEffect?: boolean;
 };
 
 /**
  * Fejezet: görgetésre a háttérben úszó óriás sorszám parallaxban mozog,
- * kilépéskor pedig a tartalom hátrébb lép, átadva a helyet a következőnek.
+ * kilépéskor pedig a tartalom elhalványul, átadva a helyet a következőnek. (Zsugorítás nélkül:
+ * a nem egész skála törtpixelre tolta a kártyák 1 px-es szegélyét, és az alsó elmosódott.)
  */
 export function Section({
   id,
@@ -42,7 +43,6 @@ export function Section({
     target: ref,
     offset: ["end 55%", "end start"],
   });
-  const exitScale = useTransform(exitProgress, [0, 1], [1, 0.94]);
   const exitOpacity = useTransform(exitProgress, [0, 1], [1, 0.2]);
 
   return (
@@ -62,11 +62,11 @@ export function Section({
       </m.span>
 
       <m.div
-        style={reduceMotion || !exitEffect ? undefined : { scale: exitScale, opacity: exitOpacity }}
+        style={reduceMotion || !exitEffect ? undefined : { opacity: exitOpacity }}
         // Alul 2.5rem tartalék (és ugyanennyi negatív margó): a megjelenő elemek a `reveal`
         // animáció elején legfeljebb 28 px-szel lejjebb vannak. Safari a dobozt rétegként
         // kezeli, és ami kilóg belőle, azt levágja (az utolsó kártyasor alsó szegélyét).
-        className="section-shell -mb-10 origin-top pb-10"
+        className="section-shell -mb-10 pb-10"
       >
         <header className="reveal mb-12 max-w-3xl sm:mb-16">
           <p className="eyebrow">
