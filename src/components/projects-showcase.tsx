@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  m,
-  useMotionValue,
-  useMotionValueEvent,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "motion/react";
+import { m, useMotionValue, useMotionValueEvent, useScroll, useTransform } from "motion/react";
 import {
   useEffect,
   useMemo,
@@ -102,8 +95,9 @@ function ProjectsTrack() {
     target: containerRef,
     offset: ["start start", "end end"],
   });
-  const rawX = useTransform(() => -scrollYProgress.get() * distanceValue.get());
-  const x = useSpring(rawX, { stiffness: 260, damping: 42, mass: 0.4 });
+  // Tartalék (görgetésvezérelt CSS-animáció nélkül): az eltolás rugó nélkül, közvetlenül a görgetést
+  // követi; a simítás lemaradást és megállás utáni továbbcsúszást okozott.
+  const x = useTransform(() => -scrollYProgress.get() * distanceValue.get());
 
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     const index = Math.min(items.length - 1, Math.floor(progress * items.length));
