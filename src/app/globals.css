@@ -177,6 +177,13 @@
       animation: reveal linear both;
       animation-timeline: view();
       animation-range: entry 0% cover 22%;
+      /*
+       * Saját réteg minden megjelenő elemnek. Enélkül a böngésző a fejezetek parallaxban mozgó
+       * óriás sorszámát átfedő kártyákat egy közös, átfedés miatti rétegbe vonja össze, amelynek a
+       * határa görgetés közben lemaradhat a mozgó elemtől, és levágja a kártya alsó vagy felső
+       * szegélyét (a Fő kompetenciák jobb oldali kártyáin volt látható).
+       */
+      will-change: transform, opacity;
     }
   }
 }

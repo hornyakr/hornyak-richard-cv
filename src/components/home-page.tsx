@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/site-header";
 import { content } from "@/content";
 import type { Locale } from "@/content/types";
 import { siteUrl } from "@/lib/site";
+import { plainText } from "@/lib/typography";
 
 /** Az egyoldalas önéletrajz a megadott nyelven. */
 export function HomePage({ locale }: { locale: Locale }) {
@@ -21,7 +22,7 @@ export function HomePage({ locale }: { locale: Locale }) {
     "@type": "Person",
     name: cv.name,
     jobTitle: cv.roleParts[0],
-    description: cv.profile.lead,
+    description: plainText(cv.profile.lead),
     url: new URL(cv.path, siteUrl).toString(),
     email: `mailto:${cv.email}`,
     sameAs: [cv.github.href],
