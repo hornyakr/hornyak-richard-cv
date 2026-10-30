@@ -25,6 +25,8 @@ const trackItems = (cv: CV): TrackItem[] =>
 const INTRO_REM = 22; // w-[22rem]
 const CARD_REM = 32; // w-[min(32rem,78vw)], 1024 px felett mindig 32rem
 const GAP_REM = 1.5; // gap-6
+/** Mérés előtti lépésszám (≈ a sáv útja px-ben 1440 px széles nézetnél). */
+const APPROX_TRACK_STEPS = 3200;
 const TRACK_PADDING = "max(1.5rem, calc((100vw - 72rem) / 2 + 2rem))";
 
 /** A sáv vízszintes útja tisztán CSS-ből, hogy a szerveren is a végleges magasságot rendereljük. */
@@ -92,6 +94,8 @@ function ProjectsTrack() {
         {
           height: `calc(100svh + ${trackDistance})`,
           "--track-distance": trackDistance,
+          // Egy lépés egy pixel; mérésig a CSS-ből számolt út egy közelítő lépésszámmal.
+          "--track-steps": distance === null ? APPROX_TRACK_STEPS : Math.max(1, distance),
         } as CSSProperties
       }
       className="projects-track-scope relative mx-[calc(50%-50vw)]"
@@ -101,7 +105,7 @@ function ProjectsTrack() {
          * Két réteg, hogy a két mozgatás ne írja felül egymást: a burkolót a görgetésvezérelt
          * CSS-animáció tolja (globals.css), a listát a Motion-os tartalék. Az egyik mindig nyugalomban van.
          */}
-        <div className="projects-track w-max will-change-transform">
+        <div className="projects-track w-max">
           <m.ul
             ref={trackRef}
             style={

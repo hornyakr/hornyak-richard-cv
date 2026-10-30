@@ -204,15 +204,10 @@
  * haladásjelzőt a görgetés viszi, képkockára egyezően. A konténer magassága 100svh +
  * --track-distance, így a „contain” tartomány pontosan a rögzített szakasz.
  *
- * Az animáció csak a haladást (0–1) adja; az eltolás ebből egész pixelre kerekítve számolódik.
- * Törtpixeles eltolásnál Safari a sáv szövegét minden képkockán más részpixelre tette, és a
- * betűk remegtek.
+ * Az eltolás egész pixeles lépésekben halad (steps(), a lépésszám a sáv útja pixelben):
+ * törtpixeles eltolásnál Safari a sáv szövegét minden képkockán más részpixelre tette, és a
+ * betűk remegtek. Sima transzform-animáció marad, így a böngésző külön rétegen mozgathatja.
  */
-@property --track-progress {
-  syntax: "<number>";
-  inherits: false;
-  initial-value: 0;
-}
 
 @supports (animation-timeline: view()) {
   .projects-track-scope {
@@ -228,8 +223,8 @@
   }
 
   .projects-track {
-    animation-name: projects-track-advance;
-    transform: translateX(round(calc(var(--track-progress) * var(--track-distance) * -1), 1px));
+    animation-name: projects-track-slide;
+    animation-timing-function: steps(var(--track-steps));
   }
 
   .projects-track-progress {
@@ -237,9 +232,9 @@
   }
 }
 
-@keyframes projects-track-advance {
+@keyframes projects-track-slide {
   to {
-    --track-progress: 1;
+    transform: translateX(calc(-1 * var(--track-distance)));
   }
 }
 
