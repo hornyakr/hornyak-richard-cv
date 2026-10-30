@@ -4,6 +4,7 @@ import { m, useScroll, useTransform } from "motion/react";
 import { useRef, type ReactNode } from "react";
 
 import { useReducedMotionSafe } from "@/lib/use-media-query";
+import { useScrollTimelineSupport } from "@/lib/use-scroll-timeline";
 
 type SectionProps = {
   id: string;
@@ -34,6 +35,10 @@ export function Section({
 }: SectionProps) {
   const ref = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotionSafe();
+  // Görgetésvezérelt CSS-animációval a sorszám és a kilépő halványítás JS nélkül, a görgetéssel
+  // szinkronban fut (lásd globals.css); különben a Motion-os tartalék.
+  const cssDriven = useScrollTimelineSupport();
+  const jsDriven = !reduceMotion && !cssDriven;
   const headingId = `${id}-title`;
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
@@ -51,22 +56,19 @@ export function Section({
       id={id}
       aria-labelledby={headingId}
       tabIndex={-1}
-      className={`relative isolate overflow-x-clip py-20 outline-none sm:py-28 ${className ?? ""}`}
+      className={`section-scope relative isolate overflow-x-clip py-20 outline-none sm:py-28 ${className ?? ""}`}
     >
       <m.span
         aria-hidden="true"
-        style={reduceMotion ? undefined : { y: numeralY }}
-        className="text-outline pointer-events-none absolute top-8 -right-[0.04em] -z-10 font-display text-[clamp(9rem,28vw,24rem)] leading-none font-bold tracking-[-0.06em] opacity-70 select-none"
+        style={jsDriven ? { y: numeralY } : undefined}
+        className="section-numeral text-outline pointer-events-none absolute top-8 -right-[0.04em] -z-10 font-display text-[clamp(9rem,28vw,24rem)] leading-none font-bold tracking-[-0.06em] opacity-70 select-none"
       >
         {index}
       </m.span>
 
       <m.div
-        style={reduceMotion || !exitEffect ? undefined : { opacity: exitOpacity }}
-        // Alul 2.5rem tartalék (és ugyanennyi negatív margó): a megjelenő elemek a `reveal`
-        // animáció elején legfeljebb 28 px-szel lejjebb vannak. Safari a dobozt rétegként
-        // kezeli, és ami kilóg belőle, azt levágja (az utolsó kártyasor alsó szegélyét).
-        className="section-shell -mb-10 pb-10"
+        style={jsDriven && exitEffect ? { opacity: exitOpacity } : undefined}
+        className={`section-shell ${exitEffect ? "section-exit" : ""}`}
       >
         <header className="reveal mb-12 max-w-3xl sm:mb-16">
           <p className="eyebrow">

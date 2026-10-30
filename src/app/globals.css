@@ -178,6 +178,24 @@
       animation-timeline: view();
       animation-range: entry 0% cover 22%;
     }
+
+    /* A fejezetek görgetéshez kötött mozgása (a Section komponens JS-tartaléka helyett). */
+    .section-scope {
+      view-timeline-name: --section;
+    }
+
+    .section-numeral {
+      animation: section-numeral linear both;
+      animation-timeline: --section;
+      animation-range: cover 0% cover 100%;
+    }
+
+    /* A szakasz alja a nézet 55%-ától a tetejéig ér: ezalatt halványul el a tartalom. */
+    .section-exit {
+      animation: section-exit linear both;
+      animation-timeline: --section;
+      animation-range: exit 45% exit 100%;
+    }
   }
 }
 
@@ -240,13 +258,30 @@
   }
 }
 
+/*
+ * Csak átlátszóság, eltolás nélkül: görgetés közben az alsó kártyasor szinte végig az animáció
+ * közepén van, és a törtpixeles eltolás miatt Safari levágta vagy elmosta az 1 px-es szegélyt.
+ */
 @keyframes reveal {
   from {
     opacity: 0;
-    transform: translateY(28px);
   }
   to {
     opacity: 1;
-    transform: none;
+  }
+}
+
+@keyframes section-numeral {
+  from {
+    transform: translateY(40%);
+  }
+  to {
+    transform: translateY(-40%);
+  }
+}
+
+@keyframes section-exit {
+  to {
+    opacity: 0.2;
   }
 }

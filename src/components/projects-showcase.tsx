@@ -1,14 +1,7 @@
 "use client";
 
 import { m, useMotionValue, useMotionValueEvent, useScroll, useTransform } from "motion/react";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type CSSProperties,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { fill, useContent } from "@/components/content-provider";
 import { SparkIcon } from "@/components/icons";
@@ -16,6 +9,7 @@ import { ProjectCard, ProjectsGrid } from "@/components/projects";
 import { RollingText } from "@/components/rolling-text";
 import type { CV, Project, ProjectGroup } from "@/content/types";
 import { useMediaQuery } from "@/lib/use-media-query";
+import { useScrollTimelineSupport } from "@/lib/use-scroll-timeline";
 
 type TrackItem =
   | { kind: "intro"; group: ProjectGroup }
@@ -40,20 +34,6 @@ const cssDistance = (items: TrackItem[]) => {
     intros * INTRO_REM + (items.length - intros) * CARD_REM + (items.length - 1) * GAP_REM;
   return `max(0px, ${rem}rem + 2 * ${TRACK_PADDING} - 100vw)`;
 };
-
-const noSubscription = () => () => {};
-
-/**
- * Ismeri-e a böngésző a görgetésvezérelt CSS-animációt. A szerveren és hidratáláskor `false`
- * (a JS-es mozgás), utána a valódi érték; a CSS-animáció felülírja a közben beállított inline transzformot.
- */
-function useScrollTimelineSupport() {
-  return useSyncExternalStore(
-    noSubscription,
-    () => CSS.supports("animation-timeline: view()"),
-    () => false,
-  );
-}
 
 /**
  * Rögzített, vízszintes projektsáv: a függőleges görgetés oldalirányban viszi
