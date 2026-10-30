@@ -63,7 +63,10 @@ export function Section({
 
       <m.div
         style={reduceMotion || !exitEffect ? undefined : { scale: exitScale, opacity: exitOpacity }}
-        className="section-shell origin-top"
+        // Alul 2.5rem tartalék (és ugyanennyi negatív margó): a megjelenő elemek a `reveal`
+        // animáció elején legfeljebb 28 px-szel lejjebb vannak. Safari a dobozt rétegként
+        // kezeli, és ami kilóg belőle, azt levágja (az utolsó kártyasor alsó szegélyét).
+        className="section-shell -mb-10 origin-top pb-10"
       >
         <header className="reveal mb-12 max-w-3xl sm:mb-16">
           <p className="eyebrow">
