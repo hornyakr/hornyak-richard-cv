@@ -97,39 +97,47 @@ function ProjectsTrack() {
       className="projects-track-scope relative mx-[calc(50%-50vw)]"
     >
       <div className="sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden pt-16">
-        <m.ul
-          ref={trackRef}
-          style={cssDriven ? { paddingInline: TRACK_PADDING } : { x, paddingInline: TRACK_PADDING }}
-          className="projects-track flex w-max items-stretch gap-6 will-change-transform"
-        >
-          {items.map((item) =>
-            item.kind === "intro" ? (
-              <li key={`intro-${item.group.id}`} className="flex w-[22rem] shrink-0">
-                <div
-                  className={`flex w-full flex-col justify-end rounded-2xl p-7 ${
-                    item.group.featured
-                      ? "border border-accent/30 bg-accent-soft/70"
-                      : "border border-dashed border-line-strong"
-                  }`}
-                >
-                  {item.group.featured && <SparkIcon className="mb-auto text-3xl text-accent" />}
-                  <p className="eyebrow">
-                    {fill(cv.ui.projectCount, { count: item.group.projects.length })}
-                  </p>
-                  <h3 className="mt-3 font-display text-3xl leading-tight font-semibold tracking-tight">
-                    {item.group.title}
-                  </h3>
-                  <p className="mt-3 leading-relaxed text-ink-muted">{item.group.intro}</p>
-                </div>
-              </li>
-            ) : (
-              <li key={item.project.title} className="flex w-[min(32rem,78vw)] shrink-0">
-                {/* A sávban a kártyák a kurzor alatt haladnak el: nincs felemelkedés, ami közben ugrálna. */}
-                <ProjectCard project={item.project} featured={item.group.featured} lift={false} />
-              </li>
-            ),
-          )}
-        </m.ul>
+        {/*
+         * Két réteg, hogy a két mozgatás ne írja felül egymást: a burkolót a görgetésvezérelt
+         * CSS-animáció tolja (globals.css), a listát a Motion-os tartalék. Az egyik mindig nyugalomban van.
+         */}
+        <div className="projects-track w-max will-change-transform">
+          <m.ul
+            ref={trackRef}
+            style={
+              cssDriven ? { paddingInline: TRACK_PADDING } : { x, paddingInline: TRACK_PADDING }
+            }
+            className={`flex w-max items-stretch gap-6 ${cssDriven ? "" : "will-change-transform"}`}
+          >
+            {items.map((item) =>
+              item.kind === "intro" ? (
+                <li key={`intro-${item.group.id}`} className="flex w-[22rem] shrink-0">
+                  <div
+                    className={`flex w-full flex-col justify-end rounded-2xl p-7 ${
+                      item.group.featured
+                        ? "border border-accent/30 bg-accent-soft/70"
+                        : "border border-dashed border-line-strong"
+                    }`}
+                  >
+                    {item.group.featured && <SparkIcon className="mb-auto text-3xl text-accent" />}
+                    <p className="eyebrow">
+                      {fill(cv.ui.projectCount, { count: item.group.projects.length })}
+                    </p>
+                    <h3 className="mt-3 font-display text-3xl leading-tight font-semibold tracking-tight">
+                      {item.group.title}
+                    </h3>
+                    <p className="mt-3 leading-relaxed text-ink-muted">{item.group.intro}</p>
+                  </div>
+                </li>
+              ) : (
+                <li key={item.project.title} className="flex w-[min(32rem,78vw)] shrink-0">
+                  {/* A sávban a kártyák a kurzor alatt haladnak el: nincs felemelkedés, ami közben ugrálna. */}
+                  <ProjectCard project={item.project} featured={item.group.featured} lift={false} />
+                </li>
+              ),
+            )}
+          </m.ul>
+        </div>
 
         <div className="section-shell mt-8 flex items-center gap-5">
           <RollingText value={activeGroup} className="font-mono text-xs text-ink-muted" />
