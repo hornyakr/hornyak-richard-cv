@@ -201,9 +201,19 @@
 
 /*
  * Vízszintes projektsáv: ahol a böngésző ismeri a görgetésvezérelt animációt, a sáv eltolását és a
- * haladásjelzőt a kompozitor szál viszi, a görgetéssel képkockára egyezően. A konténer magassága
- * 100svh + --track-distance, így a „contain” tartomány pontosan a rögzített szakasz.
+ * haladásjelzőt a görgetés viszi, képkockára egyezően. A konténer magassága 100svh +
+ * --track-distance, így a „contain” tartomány pontosan a rögzített szakasz.
+ *
+ * Az animáció csak a haladást (0–1) adja; az eltolás ebből egész pixelre kerekítve számolódik.
+ * Törtpixeles eltolásnál Safari a sáv szövegét minden képkockán más részpixelre tette, és a
+ * betűk remegtek.
  */
+@property --track-progress {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
 @supports (animation-timeline: view()) {
   .projects-track-scope {
     view-timeline-name: --projects-track;
@@ -218,7 +228,8 @@
   }
 
   .projects-track {
-    animation-name: projects-track-slide;
+    animation-name: projects-track-advance;
+    transform: translateX(round(calc(var(--track-progress) * var(--track-distance) * -1), 1px));
   }
 
   .projects-track-progress {
@@ -226,9 +237,9 @@
   }
 }
 
-@keyframes projects-track-slide {
+@keyframes projects-track-advance {
   to {
-    transform: translateX(calc(-1 * var(--track-distance)));
+    --track-progress: 1;
   }
 }
 

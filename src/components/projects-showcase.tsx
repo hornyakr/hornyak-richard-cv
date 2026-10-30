@@ -76,8 +76,9 @@ function ProjectsTrack() {
     offset: ["start start", "end end"],
   });
   // Tartalék (görgetésvezérelt CSS-animáció nélkül): az eltolás rugó nélkül, közvetlenül a görgetést
-  // követi; a simítás lemaradást és megállás utáni továbbcsúszást okozott.
-  const x = useTransform(() => -scrollYProgress.get() * distanceValue.get());
+  // követi (a simítás lemaradást és továbbcsúszást okozott), egész pixelre kerekítve, hogy a szöveg
+  // ne remegjen.
+  const x = useTransform(() => Math.round(-scrollYProgress.get() * distanceValue.get()));
 
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     const index = Math.min(items.length - 1, Math.floor(progress * items.length));
