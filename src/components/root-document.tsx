@@ -1,11 +1,12 @@
-import { Analytics } from "@vercel/analytics/next";
 import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
+import { AnalyticsConsent } from "@/components/analytics-consent";
 import { ContentProvider } from "@/components/content-provider";
 import { MotionProvider } from "@/components/motion-provider";
 import { ThemeScript } from "@/components/theme-script";
 import { content, languageOptions } from "@/content";
+import { privacy } from "@/content/privacy";
 import type { Locale } from "@/content/types";
 
 import "@/app/globals.css";
@@ -50,8 +51,8 @@ export function RootDocument({ locale, children }: { locale: Locale; children: R
         <ContentProvider value={{ cv, languages: languageOptions }}>
           <MotionProvider>{children}</MotionProvider>
         </ContentProvider>
-        {/* Vercel Web Analytics: süti nélküli látogatásmérés (élesben a Vercel szolgálja ki). */}
-        <Analytics />
+        {/* Vercel Web Analytics: süti nélküli látogatásmérés, csak a látogató hozzájárulása után. */}
+        <AnalyticsConsent copy={privacy[locale].consent} privacyHref={privacy[locale].path} />
       </body>
     </html>
   );

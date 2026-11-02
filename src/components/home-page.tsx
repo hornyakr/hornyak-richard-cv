@@ -5,6 +5,7 @@ import { DownloadIcon, GitHubIcon, MailIcon, MapPinIcon, SparkIcon } from "@/com
 import { InteractiveBackground } from "@/components/interactive-background";
 import { ProjectsShowcase } from "@/components/projects-showcase";
 import { Section } from "@/components/section";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { content } from "@/content";
 import type { Locale } from "@/content/types";
@@ -269,12 +270,7 @@ export function HomePage({ locale }: { locale: Locale }) {
         </Section>
       </main>
 
-      <footer className="border-t border-line">
-        <div className="section-shell flex flex-col gap-2 py-8 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>© {cv.name}</p>
-          <p>{ui.builtWith}</p>
-        </div>
-      </footer>
+      <SiteFooter locale={locale} />
     </>
   );
 }
