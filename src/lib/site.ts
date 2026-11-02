@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 
 import { content, defaultLocale, locales } from "@/content";
-import type { CV } from "@/content/types";
+import { privacy } from "@/content/privacy";
+import type { CV, Locale } from "@/content/types";
 
 function resolveSiteUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
@@ -59,3 +60,28 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: "#061113" },
   ],
 };
+
+/** Az adatkezelési tájékoztató metaadatai; a többit a nyelv gyökér-layoutja adja. */
+export function buildPrivacyMetadata(locale: Locale): Metadata {
+  const notice = privacy[locale];
+  return {
+    title: notice.metaTitle,
+    description: notice.metaDescription,
+    alternates: {
+      canonical: notice.path,
+      languages: {
+        ...Object.fromEntries(
+          locales.map((other) => [content[other].htmlLang, privacy[other].path]),
+        ),
+        "x-default": privacy[defaultLocale].path,
+      },
+    },
+    openGraph: {
+      type: "website",
+      url: notice.path,
+      title: notice.metaTitle,
+      description: notice.metaDescription,
+    },
+    twitter: { title: notice.metaTitle, description: notice.metaDescription },
+  };
+}
