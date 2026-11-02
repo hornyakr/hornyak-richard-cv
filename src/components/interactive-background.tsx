@@ -42,6 +42,10 @@ export function InteractiveBackground() {
     let width = 0;
     let height = 0;
     let frame = 0;
+    // A görgetési parallaxot a vászon CSS-eltolása adja (0 és −SPACING között), így görgetéskor
+    // nem kell a teljes vásznat újrarajzolni és a GPU-ra feltölteni; ez Safariban szaggatott.
+    let shift = 0;
+    let shiftCycle = 0;
 
     function readColors() {
       const style = getComputedStyle(document.documentElement);
@@ -55,11 +59,12 @@ export function InteractiveBackground() {
       ctx.clearRect(0, 0, width, height);
 
       const motion = !reducedMotion.matches;
-      const offsetY = motion ? -((window.scrollY * PARALLAX) % SPACING) : 0;
       const offsetX = (width % SPACING) / 2;
+      // A mutató és a hullámok a nézethez kötöttek; a vászon `shift`-tel el van tolva.
+      const pointerY = pointer.y - shift;
 
       if (motion && pointer.visible) {
-        const aura = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 360);
+        const aura = ctx.createRadialGradient(pointer.x, pointerY, 0, pointer.x, pointerY, 360);
         aura.addColorStop(0, withAlpha(colors.accent, 0.14));
         aura.addColorStop(1, withAlpha(colors.accent, 0));
         ctx.fillStyle = aura;
@@ -68,13 +73,18 @@ export function InteractiveBackground() {
 
       const activeRipples = ripples.map((ripple) => {
         const age = (now - ripple.start) / 1000;
-        return { ...ripple, radius: age * RIPPLE_SPEED, fade: 1 - age / RIPPLE_LIFE };
+        return {
+          ...ripple,
+          y: ripple.y - shift,
+          radius: age * RIPPLE_SPEED,
+          fade: 1 - age / RIPPLE_LIFE,
+        };
       });
 
-      for (let y = offsetY; y < height + SPACING; y += SPACING) {
+      for (let y = 0; y < height; y += SPACING) {
         for (let x = offsetX; x < width; x += SPACING) {
           const dx = x - pointer.x;
-          const dy = y - pointer.y;
+          const dy = y - pointerY;
           const distance = Math.hypot(dx, dy) || 1;
 
           let influence = motion && pointer.visible ? Math.max(0, 1 - distance / RADIUS) : 0;
@@ -100,7 +110,7 @@ export function InteractiveBackground() {
             ctx.strokeStyle = colors.accent;
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(pointer.x, pointer.y);
+            ctx.moveTo(pointer.x, pointerY);
             ctx.lineTo(x + (dx / distance) * push, y + (dy / distance) * push);
             ctx.stroke();
           }
@@ -143,11 +153,27 @@ export function InteractiveBackground() {
       if (!canvas || !ctx) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       width = window.innerWidth;
-      height = window.innerHeight;
+      height = window.innerHeight + SPACING;
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       schedule();
+    }
+
+    /**
+     * Görgetéskor csak a vászon eltolása változik. Újrarajzolás csak akkor kell, ha az eltolás
+     * körbeért (ilyenkor a mutatóhoz kötött kiemelés a helyére ugrik), vagy hullám fut.
+     */
+    function onScroll() {
+      if (!canvas) return;
+      const travel = reducedMotion.matches ? 0 : window.scrollY * PARALLAX;
+      shift = -(travel % SPACING);
+      canvas.style.transform = `translate3d(0, ${shift}px, 0)`;
+      const cycle = Math.floor(travel / SPACING);
+      if (cycle !== shiftCycle || ripples.length > 0) {
+        shiftCycle = cycle;
+        if (pointer.visible || ripples.length > 0) schedule();
+      }
     }
 
     function onPointerMove(event: PointerEvent) {
@@ -176,6 +202,7 @@ export function InteractiveBackground() {
 
     readColors();
     resize();
+    onScroll();
 
     const themeObserver = new MutationObserver(() => {
       readColors();
@@ -184,21 +211,25 @@ export function InteractiveBackground() {
     themeObserver.observe(document.documentElement, { attributeFilter: ["data-theme"] });
 
     window.addEventListener("resize", resize);
-    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
     document.documentElement.addEventListener("pointerleave", onPointerLeave);
-    reducedMotion.addEventListener("change", schedule);
+    const onMotionChange = () => {
+      onScroll();
+      schedule();
+    };
+    reducedMotion.addEventListener("change", onMotionChange);
 
     return () => {
       cancelAnimationFrame(frame);
       themeObserver.disconnect();
       window.removeEventListener("resize", resize);
-      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerdown", onPointerDown);
       document.documentElement.removeEventListener("pointerleave", onPointerLeave);
-      reducedMotion.removeEventListener("change", schedule);
+      reducedMotion.removeEventListener("change", onMotionChange);
     };
   }, []);
 
@@ -206,7 +237,8 @@ export function InteractiveBackground() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10 size-full"
+      // Egy rácsköznyivel (SPACING) magasabb a nézetnél, hogy az eltolás alatt se látsszon a széle.
+      className="pointer-events-none fixed top-0 left-0 -z-10 h-[calc(100%+30px)] w-full will-change-transform"
     />
   );
 }

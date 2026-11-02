@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { content, defaultLocale, locales } from "@/content";
 import { privacy } from "@/content/privacy";
 import type { CV, Locale } from "@/content/types";
+import { plainText } from "@/lib/typography";
 
 function resolveSiteUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
@@ -15,7 +16,7 @@ function resolveSiteUrl(): string {
 export const siteUrl = resolveSiteUrl();
 
 export const pageTitle = (cv: CV) => `${cv.name} – ${cv.role}`;
-export const pageDescription = (cv: CV) => `${cv.profile.lead} ${cv.valueProposition}`;
+export const pageDescription = (cv: CV) => plainText(`${cv.profile.lead} ${cv.valueProposition}`);
 
 /** hreflang-alternatívák: minden nyelv a saját útvonalán, x-default a magyar. */
 export const languageAlternates: Record<string, string> = {
